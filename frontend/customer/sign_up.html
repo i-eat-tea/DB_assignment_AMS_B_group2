@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hotel AMS-B — Create Account</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --crimson: #941213;
+      --crimson-hover: #B91415;
+      --rose: #EE1902;
+      --dark: #111111;
+      --surface: #1C1414;
+      --surface-2: #231A1A;
+      --cream: #F4F0EE;
+      --muted: #8A7F7F;
+      --border: rgba(148,18,19,0.25);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--dark);
+      color: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+    .bg-glow {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse at 15% 60%, rgba(148,18,19,0.12) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 20%, rgba(148,18,19,0.07) 0%, transparent 45%);
+      pointer-events: none;
+    }
+    .container {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 480px;
+      animation: fadeUp 0.7s ease forwards;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .logo img {
+      width: 52px; height: 52px;
+      object-fit: contain;
+      margin-bottom: 12px;
+      display: block;
+      margin-left: auto; margin-right: auto;
+    }
+    .logo h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px; font-weight: 300;
+      letter-spacing: 6px;
+      color: var(--rose);
+    }
+    .logo p {
+      font-size: 10px; letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 40px;
+    }
+    .card h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px; font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .field { margin-bottom: 20px; }
+    label {
+      display: block;
+      font-size: 10px; letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    input, select {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 2px;
+      padding: 12px 16px;
+      color: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus { border-color: var(--crimson); }
+    input::placeholder { color: #5A4F4F; }
+    select option { background: #231A1A; }
+    .btn {
+      width: 100%;
+      background: var(--crimson);
+      color: var(--cream);
+      border: none;
+      padding: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      margin-top: 8px;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: var(--crimson-hover); }
+    .divider {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin: 22px 0;
+      position: relative;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%; width: 38%;
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+    }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+    .link-btn {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 13px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px; letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+    .link-btn:hover { border-color: var(--crimson); color: var(--cream); }
+    .error {
+      background: rgba(148,18,19,0.12);
+      border: 1px solid rgba(148,18,19,0.4);
+      color: #FF7070;
+      padding: 12px 16px;
+      border-radius: 2px;
+      font-size: 13px;
+      margin-top: 16px;
+      display: none;
+    }
+    .success {
+      background: rgba(30,100,30,0.15);
+      border: 1px solid rgba(50,180,50,0.3);
+      color: #6FCF97;
+      padding: 12px 16px;
+      border-radius: 2px;
+      font-size: 13px;
+      margin-top: 16px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+  <div class="container">
+    <div class="logo">
+      <img src="./img/hotel_logo.png" alt="Hotel Logo">
+      <h1>GRAND PHROVILLA</h1>
+      <p>Guest Portal</p>
+    </div>
+    <div class="card">
+      <h2>Create Account</h2>
+      <p class="subtitle">Register to start booking your stay</p>
+
+      <div class="row">
+        <div class="field">
+          <label>First Name</label>
+          <input type="text" id="first_name" placeholder="e.g. Laisrun">
+        </div>
+        <div class="field">
+          <label>Last Name</label>
+          <input type="text" id="last_name" placeholder="e.g. Ly">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Date of Birth</label>
+        <input type="date" id="dob">
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Profession</label>
+          <input type="text" id="profession" placeholder="e.g. Engineer">
+        </div>
+        <div class="field">
+          <label>Nationality</label>
+          <input type="text" id="nationality" placeholder="e.g. Cambodian">
+        </div>
+      </div>
+
+      <button class="btn" onclick="register()">Create Account</button>
+      <div class="error" id="error"></div>
+      <div class="success" id="success"></div>
+      <div class="divider">or</div>
+      <button class="link-btn" onclick="window.location.href='sign_in.html'">Already have an account? Sign In</button>
+    </div>
+  </div>
+  <script>
+    const API = '/api';
+    async function register() {
+      const first_name = document.getElementById('first_name').value.trim();
+      const last_name = document.getElementById('last_name').value.trim();
+      const date_of_birth = document.getElementById('dob').value;
+      const profession = document.getElementById('profession').value.trim();
+      const nationality = document.getElementById('nationality').value.trim();
+      const err = document.getElementById('error');
+      const suc = document.getElementById('success');
+      err.style.display = 'none';
+      suc.style.display = 'none';
+
+      if (!first_name || !last_name || !date_of_birth || !nationality) {
+        err.textContent = 'Please fill in all required fields.';
+        err.style.display = 'block';
+        return;
+      }
+      try {
+        const res = await fetch(`${API}/auth/customer/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ first_name, last_name, date_of_birth, profession, nationality })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          err.textContent = data.error || 'Registration failed.';
+          err.style.display = 'block';
+          return;
+        }
+        suc.textContent = 'Account created! Redirecting to sign in...';
+        suc.style.display = 'block';
+        setTimeout(() => window.location.href = 'index.html', 2000);
+      } catch (e) {
+        err.textContent = 'Server error. Please try again.';
+        err.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
