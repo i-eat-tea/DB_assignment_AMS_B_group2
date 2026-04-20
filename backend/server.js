@@ -22,7 +22,3 @@ app.get('/', (req, res) => res.json({ message: 'Hotel AMS-B API running' }));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-app.use('/customer/lib', express.static(path.join(__dirname, '../frontend/customer/lib')));
-app.use('/customer/css', express.static(path.join(__dirname, '../frontend/customer/css')));
-app.use('/customer/js', express.static(path.join(__dirname, '../frontend/customer/js')));
-app.use('/customer/img', express.static(path.join(__dirname, '../frontend/customer/img')));
