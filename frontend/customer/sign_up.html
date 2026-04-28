@@ -192,33 +192,22 @@
       <h2>Create Account</h2>
       <p class="subtitle">Register to start booking your stay</p>
 
-      <div class="row">
-        <div class="field">
-          <label>First Name</label>
-          <input type="text" id="first_name" placeholder="e.g. Ly">
-        </div>
-        <div class="field">
-          <label>Last Name</label>
-          <input type="text" id="last_name" placeholder="e.g. Laisrun">
-        </div>
-      </div>
-
       <div class="field">
-        <label>Date of Birth</label>
-        <input type="date" id="dob">
+        <label>Name</label>
+        <input type="text" id="name" placeholder="e.g. Ly Laisrun">
       </div>
-
-      <div class="row">
-        <div class="field">
-          <label>Profession</label>
-          <input type="text" id="profession" placeholder="e.g. Engineer">
-        </div>
-        <div class="field">
-          <label>Nationality</label>
-          <input type="text" id="nationality" placeholder="e.g. Cambodian">
-        </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="text" id="email" placeholder="e.g. lylaisrun11k2022@gmail.com">
       </div>
-
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password">
+      </div>
+      <div class="field">
+        <label>Comfirm Password</label>
+        <input type="password" id="Comfirm_password">
+      </div>
       <button class="btn" onclick="register()">Create Account</button>
       <div class="error" id="error"></div>
       <div class="success" id="success"></div>
@@ -229,18 +218,22 @@
   <script>
     const API = '/api';
     async function register() {
-      const first_name = document.getElementById('first_name').value.trim();
-      const last_name = document.getElementById('last_name').value.trim();
-      const date_of_birth = document.getElementById('dob').value;
-      const profession = document.getElementById('profession').value.trim();
-      const nationality = document.getElementById('nationality').value.trim();
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value.trim();
+      const Comfirm_password = document.getElementById('Comfirm_password').value.trim();
       const err = document.getElementById('error');
       const suc = document.getElementById('success');
       err.style.display = 'none';
       suc.style.display = 'none';
 
-      if (!first_name || !last_name || !date_of_birth || !nationality) {
+      if (!name || !email || !password || !Comfirm_password) {
         err.textContent = 'Please fill in all required fields.';
+        err.style.display = 'block';
+        return;
+      }
+      if (password != Comfirm_password) {
+        err.textContent = 'Passwords do not match.';
         err.style.display = 'block';
         return;
       }
@@ -248,7 +241,7 @@
         const res = await fetch(`${API}/auth/customer/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ first_name, last_name, date_of_birth, profession, nationality })
+          body: JSON.stringify({ name, email, password })
         });
         const data = await res.json();
         if (!res.ok) {
@@ -258,6 +251,7 @@
         }
         suc.textContent = 'Account created! Redirecting to sign in...';
         suc.style.display = 'block';
+        localStorage.setItem('customer', JSON.stringify(data.customer));
         setTimeout(() => window.location.href = 'index.html', 2000);
       } catch (e) {
         err.textContent = 'Server error. Please try again.';

@@ -2,57 +2,25 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// Check available rooms
-router.get('/rooms/available', async (req, res) => {
-  const { check_in, check_out } = req.query;
+// display rooms
+router.get('/rooms', async (req, res) => {
+  const { hotel_id } = req.query;
   try {
     const [rows] = await db.query(
       `SELECT r.room_id, r.number, r.type, r.price, r.capacity,
-              a.has_wifi, a.bedroom_amount, a.bathroom_amount
-       FROM room r
-       LEFT JOIN amenities a ON r.room_id = a.room_id
-       WHERE r.conditions = 'free'
-       AND r.room_id NOT IN (
-         SELECT room_id FROM reservation
-         WHERE status IN ('pending','confirmed')
-         AND NOT (? <= check_in_date OR ? >= check_out_date)
-       )`,
-      [check_out, check_in]
+              a.has_wifi, a.bedroom_amount, a.bathroom_amount,
+              ri.link AS picture_url
+       FROM Room r
+       LEFT JOIN Amenities a ON r.room_id = a.room_id
+       LEFT JOIN room_img ri ON r.room_id = ri.Room_room_id
+       WHERE r.hotel_id = ?`,
+      [hotel_id]
     );
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
-// Make a reservation
-router.post('/reservation', async (req, res) => {
-  const { customer_id, room_id, check_in_date, check_out_date } = req.body;
-  try {
-    const [result] = await db.query(
-      `INSERT INTO reservation (customer_id, room_id, check_in_date, check_out_date, status)
-       VALUES (?, ?, ?, ?, 'pending')`,
-      [customer_id, room_id, check_in_date, check_out_date]
-    );
-    res.json({ success: true, reservation_id: result.insertId });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Cancel a reservation
-router.put('/reservation/:id/cancel', async (req, res) => {
-  try {
-    await db.query(
-      `UPDATE reservation SET status = 'cancelled' WHERE reservation_id = ?`,
-      [req.params.id]
-    );
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 // View own booking history
 router.get('/reservations/:customer_id', async (req, res) => {
   try {

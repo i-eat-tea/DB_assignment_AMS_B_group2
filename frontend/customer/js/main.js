@@ -114,7 +114,7 @@ const authNav = document.getElementById('auth-nav');
 if (authNav) {
     if (customer) {
         authNav.innerHTML = `
-            <span class="nav-item nav-link text-primary fw-bold">👤 ${customer.first_name}</span>
+            <span class="nav-item nav-link text-primary fw-bold">👤 ${customer.name}</span>
             <a href="#" class="nav-item nav-link text-white" onclick="logout()">Sign Out</a>
         `;
     } else {
@@ -135,7 +135,7 @@ function requireLogin(e) {
     e.preventDefault();
     const customer = JSON.parse(localStorage.getItem('customer'));
     if (!customer) {
-        window.location.href = 'login.html';
+        window.location.href = 'sign_in.html'; 
     } else {
         window.location.href = 'booking.html';
     }

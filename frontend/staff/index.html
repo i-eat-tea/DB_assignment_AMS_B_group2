@@ -125,6 +125,10 @@
           <option value="housekeeper">Housekeeper</option>
         </select>
       </div>
+      <div class="field">
+        <label>password</label>
+        <input type="password" id="password">
+      </div>
       <button class="btn" onclick="login()">ACCESS SYSTEM</button>
       <div class="error" id="error"></div>
     </div>
@@ -134,9 +138,10 @@
     async function login() {
       const staff_id = document.getElementById('staff_id').value;
       const role = document.getElementById('role').value;
+      const password = document.getElementById('password').value;
       const err = document.getElementById('error');
       err.style.display = 'none';
-      if (!staff_id || !role) {
+      if (!staff_id || !role || !password) {
         err.textContent = 'Fill in all fields.';
         err.style.display = 'block';
         return;
@@ -145,7 +150,7 @@
         const res = await fetch(`${API}/auth/staff/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ staff_id: parseInt(staff_id), role })
+          body: JSON.stringify({ staff_id: parseInt(staff_id), role,password })
         });
         const data = await res.json();
         if (!res.ok) {
