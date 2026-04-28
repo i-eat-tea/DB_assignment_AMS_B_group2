@@ -4,12 +4,13 @@ const db = require('../db');
 
 // Customer login (by name + DOB — simple, no password for now)
 router.post('/customer/login', async (req, res) => {
-  const { first_name, last_name, date_of_birth } = req.body;
+  const { name,email,password} = req.body;
   try {
+    const { email, password } = req.body;
     const [rows] = await db.query(
-      `SELECT customer_id, first_name, last_name, is_blacklisted 
-       FROM customer WHERE first_name = ? AND last_name = ? AND date_of_birth = ?`,
-      [first_name, last_name, date_of_birth]
+      `SELECT customer_id, name, email, password, is_blacklisted 
+      FROM customer WHERE email = ? AND password = ?`,
+      [email, password]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Customer not found' });
     if (rows[0].is_blacklisted) return res.status(403).json({ error: 'Account is blacklisted' });

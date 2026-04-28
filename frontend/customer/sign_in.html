@@ -176,16 +176,12 @@
       <h2>Welcome Back</h2>
       <p class="subtitle">Sign in to manage your reservations</p>
       <div class="field">
-        <label>First Name</label>
-        <input type="text" id="first_name" placeholder="e.g. LY">
+        <label>Email</label>
+        <input type="text" id="email" placeholder="e.g. alice@example.com">
       </div>
       <div class="field">
-        <label>Last Name</label>
-        <input type="text" id="last_name" placeholder="e.g. Laisrun">
-      </div>
-      <div class="field">
-        <label>Date of Birth</label>
-        <input type="date" id="dob">
+        <label>Password</label>
+        <input type="text" id="password" placeholder="e.g. pwd1">
       </div>
       <button class="btn" onclick="login()">Sign In</button>
       <div class="error" id="error"></div>
@@ -195,36 +191,37 @@
   </div>
   <script>
     const API = '/api';
-    async function login() {
-      const first_name = document.getElementById('first_name').value.trim();
-      const last_name = document.getElementById('last_name').value.trim();
-      const date_of_birth = document.getElementById('dob').value;
-      const err = document.getElementById('error');
-      err.style.display = 'none';
-      if (!first_name || !last_name || !date_of_birth) {
-        err.textContent = 'Please fill in all fields.';
+      async function login() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const err = document.getElementById('error');
+    err.style.display = 'none';
+
+    if (!email || !password) {
+      err.textContent = 'Please fill in all fields.';
+      err.style.display = 'block';
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/auth/customer/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        err.textContent = data.error || 'Login failed.';
         err.style.display = 'block';
         return;
       }
-      try {
-        const res = await fetch(`${API}/auth/customer/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ first_name, last_name, date_of_birth })
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          err.textContent = data.error || 'Login failed.';
-          err.style.display = 'block';
-          return;
-        }
-        localStorage.setItem('customer', JSON.stringify(data.customer));
-        window.location.href = 'index.html';
-      } catch (e) {
-        err.textContent = 'Server error. Please try again.';
-        err.style.display = 'block';
-      }
+      localStorage.setItem('customer', JSON.stringify(data.customer));
+      window.location.href = 'index.html';
+    } catch (e) {
+      err.textContent = 'Server error. Please try again.';
+      err.style.display = 'block';
     }
+  }
   </script>
 </body>
 </html>
