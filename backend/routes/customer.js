@@ -9,12 +9,60 @@ router.get('/rooms', async (req, res) => {
     const [rows] = await db.query(
       `SELECT r.room_id, r.number, r.type, r.price, r.capacity,
               a.has_wifi, a.bedroom_amount, a.bathroom_amount,
-              ri.link AS picture_url
+              GROUP_CONCAT(ri.link) AS images
        FROM Room r
        LEFT JOIN Amenities a ON r.room_id = a.room_id
        LEFT JOIN room_img ri ON r.room_id = ri.Room_room_id
-       WHERE r.hotel_id = ?`,
+       WHERE r.hotel_id = ?
+       GROUP BY r.room_id, r.number, r.type, r.price, r.capacity,
+                a.has_wifi, a.bedroom_amount, a.bathroom_amount`,
       [hotel_id]
+    );
+    const result = rows.map(r => ({
+      ...r,
+      images: r.images ? r.images.split(',') : []
+    }));
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+// Make a reservation 
+router.post('/reservation', async (req, res) => {
+  const { customer_id, room_id, check_in, check_out } = req.body;
+  try {
+    // check for overlap
+    const [conflict] = await db.query(
+      `SELECT reservation_id FROM Reservation 
+       WHERE room_id = ? 
+       AND status NOT IN ('cancelled')
+       AND check_in_date < ? AND check_out_date > ?`,
+      [room_id, check_out, check_in]
+    );
+
+    if (conflict.length > 0) {
+      return res.status(409).json({ error: 'Room is already booked for those dates.' });
+    }
+
+    const [result] = await db.query(
+      `INSERT INTO Reservation (customer_id, room_id, check_in_date, check_out_date, status)
+       VALUES (?, ?, ?, ?, 'pending')`,
+      [customer_id, room_id, check_in, check_out]
+    );
+
+    res.json({ success: true, reservation_id: result.insertId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+//room date
+router.get('/reservation/booked-dates', async (req, res) => {
+  const { room_id } = req.query;
+  try {
+    const [rows] = await db.query(
+      `SELECT check_in_date, check_out_date FROM Reservation
+       WHERE room_id = ? AND status NOT IN ('cancelled')`,
+      [room_id]
     );
     res.json(rows);
   } catch (err) {

@@ -216,9 +216,9 @@
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <select class="form-select" id="select1">
-                                              <option value="1">Adult 1</option>
-                                              <option value="2">Adult 2</option>
-                                              <option value="3">Adult 3</option>
+                                              <option value="1">1 Adult</option>
+                                              <option value="2">2 Adults</option>
+                                              <option value="3">3 Adults</option>
                                             </select>
                                             <label for="select1">Select Adult</label>
                                           </div>
@@ -226,9 +226,10 @@
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <select class="form-select" id="select2">
-                                              <option value="1">Child 1</option>
-                                              <option value="2">Child 2</option>
-                                              <option value="3">Child 3</option>
+                                              <option value="0">No Child</option>
+                                              <option value="1">1 Child</option>
+                                              <option value="2">2 Children</option>
+                                              <option value="3">3 Children</option>
                                             </select>
                                             <label for="select2">Select Child</label>
                                           </div>
@@ -236,12 +237,13 @@
                                     <div class="col-12">
                                         <div class="form-floating">
                                             <select class="form-select" id="select3">
-                                              <option value="1">Room 1</option>
-                                              <option value="2">Room 2</option>
-                                              <option value="3">Room 3</option>
+                                                <option value="">Loading rooms...</option>
                                             </select>
                                             <label for="select3">Select A Room</label>
-                                          </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div id="booked-dates-info" class="mt-1 ps-1"></div>
                                     </div>
                                     <div class="col-12">
                                         <div class="form-floating">
@@ -331,6 +333,15 @@
 
         <!-- Back to Top -->
         <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+        <!-- Toast -->
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+            <div id="bookingToast" class="toast align-items-center text-white bg-primary border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body fs-6" id="toastMsg">Booking confirmed!</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- JavaScript Libraries -->
@@ -347,6 +358,135 @@
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+    <script>
+        const HOTEL_ID = 1; 
+        function showToast(msg, success = true) {
+            const toast = document.getElementById('bookingToast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.className = `toast align-items-center text-white border-0 ${success ? 'bg-primary' : 'bg-danger'}`;
+            new bootstrap.Toast(toast, { delay: 3000 }).show();
+        }
+        async function requireLogin(e) {
+            e.preventDefault();
+
+            const customer = JSON.parse(localStorage.getItem('customer'));
+            if (!customer) {
+                showToast('Please sign in to make a reservation.', false);
+                setTimeout(() => window.location.href = 'sign_in.html', 1500);
+                return;
+            }
+
+            const check_in  = document.getElementById('checkin').value;
+            const check_out = document.getElementById('checkout').value;
+            const adults    = document.getElementById('select1').value;
+            const childs    = document.getElementById('select2').value;
+            const room_id   = new URLSearchParams(window.location.search).get('room_id')
+                                || document.getElementById('select3').value;
+
+            if (!check_in || !check_out) {
+                showToast('Please select check-in and check-out dates.', false);
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/customer/reservation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customer_id: customer.customer_id,
+                        room_id, check_in, check_out, adults, childs
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Booking confirmed! ✓');
+                    setTimeout(() => window.location.href = 'index.html', 1500);
+                } else {
+                    showToast(data.error || 'Booking failed.', false);
+                }
+            } catch (err) {
+                showToast('Server error.', false);
+            }
+        }
+        async function loadRooms() {
+            const res = await fetch(`/api/customer/rooms?hotel_id=${HOTEL_ID}`);
+            const rooms = await res.json();
+            const select = document.getElementById('select3');
+            select.innerHTML = rooms.map(r =>
+                `<option value="${r.room_id}">Room ${r.number} — ${r.type} ($${r.price}/night)</option>`
+            ).join('');
+
+            // load booked dates for the default selected room
+            if (rooms.length) loadBookedDates(rooms[0].room_id);
+        }
+        async function loadBookedDates(room_id) {
+            if (!room_id) return;
+            const res = await fetch(`/api/customer/reservation/booked-dates?room_id=${room_id}`);
+            const dates = await res.json();
+
+            // build disabled dates list
+            const disabledDates = [];
+            dates.forEach(({ check_in_date, check_out_date }) => {
+                let current = new Date(check_in_date);
+                const end = new Date(check_out_date);
+                while (current < end) {
+                    disabledDates.push(current.toISOString().split('T')[0]);
+                    current.setDate(current.getDate() + 1);
+                }
+            });
+
+            // reinitialize datepickers with disabled dates
+            $('#date3').datetimepicker('destroy');
+            $('#date4').datetimepicker('destroy');
+
+            $('#date3').datetimepicker({
+                format: 'YYYY-MM-DD',
+                minDate: moment(),
+                disabledDates: disabledDates
+            });
+            $('#date4').datetimepicker({
+                format: 'YYYY-MM-DD',
+                minDate: moment(),
+                disabledDates: disabledDates
+            });
+
+            // show booked periods in UI
+            const container = document.getElementById('booked-dates-info');
+            if (!dates.length) {
+                container.innerHTML = '<small class="text-success">✓ Room is available</small>';
+                return;
+            }
+            container.innerHTML = `
+                <small class="text-danger fw-bold">Booked periods:</small>
+                <ul class="mb-0 ps-3">
+                    ${dates.map(d => `
+                        <li><small class="text-danger">${d.check_in_date} → ${d.check_out_date}</small></li>
+                    `).join('')}
+                </ul>
+            `;
+        }
+
+        // reload booked dates when room selection changes
+       document.addEventListener('DOMContentLoaded', () => {
+            // init datepickers once
+            $('#date3').datetimepicker({ format: 'YYYY-MM-DD', minDate: moment() });
+            $('#date4').datetimepicker({ format: 'YYYY-MM-DD', minDate: moment() });
+
+            loadRooms();
+
+            const customer = JSON.parse(localStorage.getItem('customer'));
+            if (customer) {
+                document.getElementById('name').value = customer.name;
+                document.getElementById('email').value = customer.email;
+                document.getElementById('name').setAttribute('readonly', true);
+                document.getElementById('email').setAttribute('readonly', true);
+            }
+
+            document.getElementById('select3').addEventListener('change', function() {
+                loadBookedDates(this.value);
+            });
+        });
+    </script>
 </body>
 
 </html>

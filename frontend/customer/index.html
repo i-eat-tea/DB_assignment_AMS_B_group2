@@ -148,30 +148,15 @@
                             <div class="row g-2">
                                 <div class="col-md-3">
                                     <div class="date" id="date1" data-target-input="nearest">
-                                        <input type="text" class="form-control datetimepicker-input"
-                                            placeholder="Check in" data-target="#date1" data-toggle="datetimepicker" />
+                                        <input type="text" id="check_in" class="form-control datetimepicker-input"
+                                            placeholder="Check in" data-target="#date1" data-toggle="datetimepicker"/>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="date" id="date2" data-target-input="nearest">
-                                        <input type="text" class="form-control datetimepicker-input" placeholder="Check out" data-target="#date2" data-toggle="datetimepicker"/>
+                                        <input type="text" id="check_out" class="form-control datetimepicker-input"
+                                            placeholder="Check out" data-target="#date2" data-toggle="datetimepicker"/>
                                     </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <select class="form-select">
-                                        <option selected>Adult</option>
-                                        <option value="1">Adult 1</option>
-                                        <option value="2">Adult 2</option>
-                                        <option value="3">Adult 3</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <select class="form-select">
-                                        <option selected>Child</option>
-                                        <option value="1">Child 1</option>
-                                        <option value="2">Child 2</option>
-                                        <option value="3">Child 3</option>
-                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -244,8 +229,6 @@
             </div>
         </div>
         <!-- About End -->
-
-
         <!-- Room Start -->
         <div class="container-xxl py-5">
             <div class="container">
@@ -253,102 +236,14 @@
                     <h6 class="section-title text-center text-primary text-uppercase">Our Rooms</h6>
                     <h1 class="mb-5">Explore Our <span class="text-primary text-uppercase">Rooms</span></h1>
                 </div>
-                <div class="row g-4">
-                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                        <div class="room-item shadow rounded overflow-hidden">
-                            <div class="position-relative">
-                                <img class="img-fluid" src="img/room-1.jpg" alt="">
-                                <small class="position-absolute start-0 top-100 translate-middle-y bg-primary text-white rounded py-1 px-3 ms-4">$100/Night</small>
-                            </div>
-                            <div class="p-4 mt-2">
-                                <div class="d-flex justify-content-between mb-3">
-                                    <h5 class="mb-0">Junior Suite</h5>
-                                    <div class="ps-2">
-                                        <small class="fa fa-star text-primary"></small>
-                                        <small class="fa fa-star text-primary"></small>
-                                        <small class="fa fa-star text-primary"></small>
-                                        <small class="fa fa-star text-primary"></small>
-                                        <small class="fa fa-star text-primary"></small>
-                                    </div>
-                                </div>
-                                <div class="d-flex mb-3">
-                                    <small class="border-end me-3 pe-3"><i class="fa fa-bed text-primary me-2"></i>3 Bed</small>
-                                    <small class="border-end me-3 pe-3"><i class="fa fa-bath text-primary me-2"></i>2 Bath</small>
-                                    <small><i class="fa fa-wifi text-primary me-2"></i>Wifi</small>
-                                </div>
-                                <p class="text-body mb-3">Erat ipsum justo amet duo et elitr dolor, est duo duo eos lorem sed diam stet diam sed stet lorem.</p>
-                                <div class="d-flex justify-content-between">
-                                    <a class="btn btn-sm btn-primary rounded py-2 px-4" href="">View Detail</a>
-                                    <a class="btn btn-sm btn-dark rounded py-2 px-4" href="">Book Now</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
-                        <div class="room-item shadow rounded overflow-hidden">
-                            <div class="position-relative">
-                                <img class="img-fluid" src="img/room-2.jpg" alt="">
-                                <small class="position-absolute start-0 top-100 translate-middle-y bg-primary text-white rounded py-1 px-3 ms-4">$100/Night</small>
-                            </div>
-                            <div class="p-4 mt-2">
-                                <div class="d-flex justify-content-between mb-3">
-                                    <h5 class="mb-0">Executive Suite</h5>
-                                    <div class="ps-2">
-                                        <small class="fa fa-star text-primary"></small>
-                                        <small class="fa fa-star text-primary"></small>
-                                        <small class="fa fa-star text-primary"></small>
-                                        <small class="fa fa-star text-primary"></small>
-                                        <small class="fa fa-star text-primary"></small>
-                                    </div>
-                                </div>
-                                <div class="d-flex mb-3">
-                                    <small class="border-end me-3 pe-3"><i class="fa fa-bed text-primary me-2"></i>3 Bed</small>
-                                    <small class="border-end me-3 pe-3"><i class="fa fa-bath text-primary me-2"></i>2 Bath</small>
-                                    <small><i class="fa fa-wifi text-primary me-2"></i>Wifi</small>
-                                </div>
-                                <p class="text-body mb-3">Erat ipsum justo amet duo et elitr dolor, est duo duo eos lorem sed diam stet diam sed stet lorem.</p>
-                                <div class="d-flex justify-content-between">
-                                    <a class="btn btn-sm btn-primary rounded py-2 px-4" href="">View Detail</a>
-                                    <a class="btn btn-sm btn-dark rounded py-2 px-4" href="">Book Now</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.6s">
-                        <div class="room-item shadow rounded overflow-hidden">
-                            <div class="position-relative">
-                                <img class="img-fluid" src="img/room-3.jpg" alt="">
-                                <small class="position-absolute start-0 top-100 translate-middle-y bg-primary text-white rounded py-1 px-3 ms-4">$100/Night</small>
-                            </div>
-                            <div class="p-4 mt-2">
-                                <div class="d-flex justify-content-between mb-3">
-                                    <h5 class="mb-0">Super Deluxe</h5>
-                                    <div class="ps-2">
-                                        <small class="fa fa-star text-primary"></small>
-                                        <small class="fa fa-star text-primary"></small>
-                                        <small class="fa fa-star text-primary"></small>
-                                        <small class="fa fa-star text-primary"></small>
-                                        <small class="fa fa-star text-primary"></small>
-                                    </div>
-                                </div>
-                                <div class="d-flex mb-3">
-                                    <small class="border-end me-3 pe-3"><i class="fa fa-bed text-primary me-2"></i>3 Bed</small>
-                                    <small class="border-end me-3 pe-3"><i class="fa fa-bath text-primary me-2"></i>2 Bath</small>
-                                    <small><i class="fa fa-wifi text-primary me-2"></i>Wifi</small>
-                                </div>
-                                <p class="text-body mb-3">Erat ipsum justo amet duo et elitr dolor, est duo duo eos lorem sed diam stet diam sed stet lorem.</p>
-                                <div class="d-flex justify-content-between">
-                                    <a class="btn btn-sm btn-primary rounded py-2 px-4" href="">View Detail</a>
-                                    <a class="btn btn-sm btn-dark rounded py-2 px-4" href="">Book Now</a>
-                                </div>
-                            </div>
-                        </div>
+                <div class="row g-4" id="room-container">
+                    <div class="text-center w-100 py-5" id="room-loading">
+                    <div class="spinner-border text-primary" role="status"></div>
                     </div>
                 </div>
             </div>
         </div>
         <!-- Room End -->
-
 
         <!-- Testimonial Start -->
         <div class="container-xxl testimonial my-5 py-5 bg-dark wow zoomIn" data-wow-delay="0.1s">
@@ -472,6 +367,107 @@
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+    <!--Route stuff-->
+    <script>
+    const HOTEL_ID = 1; // change to your actual hotel ID
+
+    function renderRooms(rooms) {
+        const container = document.getElementById('room-container');
+        if (!rooms.length) {
+            container.innerHTML = '<p class="text-center text-muted py-5">No rooms available for the selected dates.</p>';
+            return;
+        }
+
+        container.innerHTML = rooms.map((r, i) => {
+            const images = r.images?.length ? r.images : ['img/room-1.jpg'];
+            const carouselId = `carousel-${r.room_id}`;
+
+            const slides = images.map((src, j) => `
+                <div class="carousel-item ${j === 0 ? 'active' : ''}">
+                    <img src="${src}" style="width:100%;height:230px;object-fit:cover;"
+                        onerror="this.src='img/room-1.jpg'" alt="${r.type}">
+                </div>
+            `).join('');
+
+            const controls = images.length > 1 ? `
+                <button class="carousel-control-prev" type="button" data-bs-target="#${carouselId}" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#${carouselId}" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            ` : '';
+
+            return `
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="${(i % 3) * 0.2}s">
+                <div class="room-item shadow rounded overflow-hidden">
+
+                <div class="position-relative" style="height: 230px; overflow: hidden;">
+                    <div id="${carouselId}" class="carousel slide h-100" data-bs-ride="carousel">
+                        <div class="carousel-inner h-100">${slides}</div>
+                        ${controls}
+                    </div>
+                    <small class="position-absolute start-0 bottom-0 bg-primary text-white rounded py-1 px-3 ms-4 mb-2" style="z-index:10;">
+                        $${r.price}/Night
+                    </small>
+                </div>
+
+                <div class="p-4 mt-2">
+                    <div class="d-flex justify-content-between mb-3">
+                    <h5 class="mb-0">${r.type}</h5>
+                    <div class="ps-2">
+                        ${'<small class="fa fa-star text-primary"></small>'.repeat(5)}
+                    </div>
+                    </div>
+                    <div class="d-flex mb-3">
+                    <small class="border-end me-3 pe-3">
+                        <i class="fa fa-bed text-primary me-2"></i>${r.bedroom_amount ?? '-'} Bed
+                    </small>
+                    <small class="border-end me-3 pe-3">
+                        <i class="fa fa-bath text-primary me-2"></i>${r.bathroom_amount ?? '-'} Bath
+                    </small>
+                    ${r.has_wifi ? '<small><i class="fa fa-wifi text-primary me-2"></i>Wifi</small>' : ''}
+                    </div>
+                    <p class="text-body mb-3">Room No. ${r.number} &bull; Capacity: ${r.capacity}</p>
+                    <div class="d-flex justify-content-between">
+                    <a class="btn btn-sm btn-primary rounded py-2 px-4" href="room-detail.html?id=${r.room_id}">View Detail</a>
+                    <a class="btn btn-sm btn-dark rounded py-2 px-4" href="booking.html?room_id=${r.room_id}">Book Now</a>
+                    </div>
+                </div>
+                </div>
+            </div>
+            `;
+        }).join('');
+    }
+
+    async function fetchRooms() {
+        const check_in  = document.getElementById('check_in').value;  // ✅ assign
+        const check_out = document.getElementById('check_out').value; // ✅ assign
+
+        let url = `http://localhost:3000/api/customer/rooms?hotel_id=${HOTEL_ID}`; // ✅ add rooms
+        if (check_in)  url += `&check_in=${check_in}`;
+        if (check_out) url += `&check_out=${check_out}`;
+
+        document.getElementById('room-loading').style.display = 'block';
+
+        try {
+            const res  = await fetch(url);
+            const data = await res.json();
+            document.getElementById('room-loading').style.display = 'none';
+            renderRooms(data);
+        } catch (err) {
+            document.getElementById('room-loading').innerHTML =
+                '<p class="text-danger">Failed to load rooms. Please try again.</p>';
+        }
+        }
+
+    document.addEventListener('DOMContentLoaded', () => {
+    fetchRooms();
+
+    const btn = document.querySelector('.booking .btn-primary');
+    if (btn) btn.addEventListener('click', fetchRooms);
+    });
+    </script>
 </body>
 
 </html>
