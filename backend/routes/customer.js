@@ -12,7 +12,7 @@ router.get('/rooms', async (req, res) => {
               GROUP_CONCAT(ri.link) AS images
        FROM Room r
        LEFT JOIN Amenities a ON r.room_id = a.room_id
-       LEFT JOIN room_img ri ON r.room_id = ri.Room_room_id
+       LEFT JOIN room_img ri ON r.room_id = ri.room_id
        WHERE r.hotel_id = ?
        GROUP BY r.room_id, r.number, r.type, r.price, r.capacity,
                 a.has_wifi, a.bedroom_amount, a.bathroom_amount`,
