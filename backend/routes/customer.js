@@ -4,63 +4,139 @@ const db = require('../db');
 
 // display rooms
 router.get('/rooms', async (req, res) => {
-  const { hotel_id } = req.query;
+  const { hotel_id, check_in, check_out } = req.query;
+  
+  let query = `
+    SELECT r.room_id, r.number, r.type, r.price, r.capacity,
+           a.has_wifi, a.bedroom_amount, a.bathroom_amount,
+           MIN(ri.link) AS picture_url
+    FROM room r
+    LEFT JOIN amenities a ON r.room_id = a.room_id
+    LEFT JOIN room_img ri ON r.room_id = ri.room_id
+    WHERE r.hotel_id = ?`;
+
+  const params = [hotel_id];
+
+  if (check_in && check_out) {
+    query += ` AND r.room_id NOT IN (
+      SELECT room_id FROM reservation
+      WHERE status IN ('pending','confirmed')
+      AND NOT (? <= check_in_date OR ? >= check_out_date)
+    )`;
+    params.push(check_out, check_in);
+  }
+
+  query += ` GROUP BY r.room_id, r.number, r.type, r.price, r.capacity,
+             a.has_wifi, a.bedroom_amount, a.bathroom_amount`;
+
   try {
-    const [rows] = await db.query(
-      `SELECT r.room_id, r.number, r.type, r.price, r.capacity,
-              a.has_wifi, a.bedroom_amount, a.bathroom_amount,
-              GROUP_CONCAT(ri.link) AS images
-       FROM Room r
-       LEFT JOIN Amenities a ON r.room_id = a.room_id
-       LEFT JOIN room_img ri ON r.room_id = ri.room_id
-       WHERE r.hotel_id = ?
-       GROUP BY r.room_id, r.number, r.type, r.price, r.capacity,
-                a.has_wifi, a.bedroom_amount, a.bathroom_amount`,
-      [hotel_id]
-    );
-    const result = rows.map(r => ({
-      ...r,
-      images: r.images ? r.images.split(',') : []
-    }));
-    res.json(result);
+    const [rows] = await db.query(query, params);
+    res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-// Make a reservation 
+
+// room detail
+router.get('/rooms/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [[room]] = await db.query(
+      `SELECT r.room_id, r.number, r.type, r.price, r.capacity,
+              r.conditions, a.has_wifi, a.bedroom_amount, a.bathroom_amount
+       FROM room r
+       LEFT JOIN amenities a ON r.room_id = a.room_id
+       WHERE r.room_id = ?`,
+      [id]
+    );
+    if (!room) return res.status(404).json({ error: 'Room not found' });
+    const [images] = await db.query(`SELECT link FROM room_img WHERE room_id = ?`, [id]);
+    room.images = images.map(i => i.link);
+    res.json(room);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// stats
+router.get('/stats', async (req, res) => {
+  try {
+    const [[rooms]]   = await db.query('SELECT COUNT(*) AS count FROM Room WHERE hotel_id = ?', [1]);
+    const [[staff]]   = await db.query('SELECT COUNT(*) AS count FROM staff');
+    const [[clients]] = await db.query('SELECT COUNT(*) AS count FROM customer');
+    res.json({ rooms: rooms.count, staff: staff.count, clients: clients.count });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// receipt
+router.get('/receipt/:reservation_id', async (req, res) => {
+  const { reservation_id } = req.params;
+  try {
+    const [[receipt]] = await db.query(
+      `SELECT rc.*, 
+              r.number, r.type, r.price,
+              c.name, c.email,
+              res.check_in_date, res.check_out_date, res.status
+       FROM receipt rc
+       JOIN room r ON rc.room_id = r.room_id
+       JOIN customer c ON rc.customer_id = c.customer_id
+       JOIN reservation res ON rc.reservation_id = res.reservation_id
+       WHERE rc.reservation_id = ?`,
+      [reservation_id]
+    );
+    if (!receipt) return res.status(404).json({ error: 'Receipt not found' });
+    res.json(receipt);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// create reservation + receipt
 router.post('/reservation', async (req, res) => {
   const { customer_id, room_id, check_in, check_out } = req.body;
   try {
-    // check for overlap
     const [conflict] = await db.query(
-      `SELECT reservation_id FROM Reservation 
+      `SELECT reservation_id FROM reservation 
        WHERE room_id = ? 
        AND status NOT IN ('cancelled')
        AND check_in_date < ? AND check_out_date > ?`,
       [room_id, check_out, check_in]
     );
-
     if (conflict.length > 0) {
       return res.status(409).json({ error: 'Room is already booked for those dates.' });
     }
 
     const [result] = await db.query(
-      `INSERT INTO Reservation (customer_id, room_id, check_in_date, check_out_date, status)
+      `INSERT INTO reservation (customer_id, room_id, check_in_date, check_out_date, status)
        VALUES (?, ?, ?, ?, 'pending')`,
       [customer_id, room_id, check_in, check_out]
     );
+    const reservation_id = result.insertId;
 
-    res.json({ success: true, reservation_id: result.insertId });
+    const [[room]] = await db.query(`SELECT price FROM room WHERE room_id = ?`, [room_id]);
+    const nights = Math.ceil((new Date(check_out) - new Date(check_in)) / (1000 * 60 * 60 * 24));
+    const total_bill = (room.price * nights).toFixed(2);
+
+    await db.query(
+      `INSERT INTO receipt (reservation_id, room_id, customer_id, clock_in, clock_out, total_bill, is_paid)
+       VALUES (?, ?, ?, ?, ?, ?, 0)`,
+      [reservation_id, room_id, customer_id, check_in, check_out, total_bill]
+    );
+
+    res.json({ success: true, reservation_id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-//room date
+
+// booked dates — MUST be before /reservation/:id
 router.get('/reservation/booked-dates', async (req, res) => {
   const { room_id } = req.query;
   try {
     const [rows] = await db.query(
-      `SELECT check_in_date, check_out_date FROM Reservation
+      `SELECT check_in_date, check_out_date FROM reservation
        WHERE room_id = ? AND status NOT IN ('cancelled')`,
       [room_id]
     );
@@ -69,7 +145,74 @@ router.get('/reservation/booked-dates', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// View own booking history
+
+// by-receipt — MUST be before /reservation/:id
+router.get('/reservation/by-receipt/:receipt_id', async (req, res) => {
+  const { receipt_id } = req.params;
+  try {
+    const [[reservation]] = await db.query(
+      `SELECT res.*, r.number, r.type, r.price, c.name, c.email
+       FROM receipt rc
+       JOIN reservation res ON rc.reservation_id = res.reservation_id
+       JOIN room r ON res.room_id = r.room_id
+       JOIN customer c ON res.customer_id = c.customer_id
+       WHERE rc.receipt_id = ?`,
+      [receipt_id]
+    );
+    if (!reservation) return res.status(404).json({ error: 'Receipt not found' });
+    res.json(reservation);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+const { BakongKHQR, khqrData, IndividualInfo } = require('bakong-khqr');
+//qr stuff
+router.get('/receipt/qr/:reservation_id', async (req, res) => {
+  const { reservation_id } = req.params;
+  try {
+    const [[receipt]] = await db.query(
+      `SELECT total_bill FROM receipt WHERE reservation_id = ?`, [reservation_id]
+    );
+    if (!receipt) return res.status(404).json({ error: 'Receipt not found' });
+
+    const individualInfo = new IndividualInfo(
+      '4286090199001189',        // your bakong ID (change this)
+      'Laisrun LY',               // merchant name
+      'Phnom Penh',              // city
+      'USD',                     // currency
+      parseFloat(receipt.total_bill),
+      'KH',                      // country
+      `RES-${reservation_id}`,   // bill number
+      '',                        // store label
+      '',                        // terminal label
+    );
+
+    const { data } = BakongKHQR.generateIndividual(individualInfo);
+    res.json({ qr: data.qrImage, amount: receipt.total_bill });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+// get reservation by ID
+router.get('/reservation/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [[reservation]] = await db.query(
+      `SELECT res.*, r.number, r.type, r.price, c.name, c.email
+       FROM reservation res
+       JOIN room r ON res.room_id = r.room_id
+       JOIN customer c ON res.customer_id = c.customer_id
+       WHERE res.reservation_id = ?`,
+      [id]
+    );
+    if (!reservation) return res.status(404).json({ error: 'Reservation not found' });
+    res.json(reservation);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// booking history
 router.get('/reservations/:customer_id', async (req, res) => {
   try {
     const [rows] = await db.query(
@@ -88,52 +231,82 @@ router.get('/reservations/:customer_id', async (req, res) => {
   }
 });
 
-// View receipt
-router.get('/receipt/:reservation_id', async (req, res) => {
+// edit reservation dates
+router.put('/reservation/:id', async (req, res) => {
+  const { id } = req.params;
+  const { check_in, check_out, customer_id } = req.body;
   try {
-    const [rows] = await db.query(
-      `SELECT rec.receipt_id, rec.clock_in, rec.clock_out, rec.total_bill, rec.is_paid,
-              c.first_name, c.last_name,
-              r.number AS room_number, r.type AS room_type,
-              p.statement AS promo_statement, p.discounts
-       FROM receipt rec
-       JOIN customer c ON rec.customer_id = c.customer_id
-       JOIN room r ON rec.room_id = r.room_id
-       LEFT JOIN promotional p ON rec.promotional_id = p.promotional_id
-       WHERE rec.reservation_id = ?`,
-      [req.params.reservation_id]
+    const [[res_check]] = await db.query(
+      `SELECT customer_id FROM reservation WHERE reservation_id = ?`, [id]
     );
-    res.json(rows[0] || null);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+    if (!res_check) return res.status(404).json({ error: 'Reservation not found' });
+    if (res_check.customer_id != customer_id) return res.status(403).json({ error: 'Not your reservation' });
 
-// Submit a review
-router.post('/review', async (req, res) => {
-  const { customer_id, room_id, stars, statement } = req.body;
-  try {
-    await db.query(
-      `INSERT INTO review (customer_id, room_id, stars, statement, time, is_valid)
-       VALUES (?, ?, ?, ?, NOW(), 1)`,
-      [customer_id, room_id, stars, statement]
+    const [conflict] = await db.query(
+      `SELECT reservation_id FROM reservation
+       WHERE room_id = (SELECT room_id FROM reservation WHERE reservation_id = ?)
+       AND reservation_id != ?
+       AND status NOT IN ('cancelled')
+       AND check_in_date < ? AND check_out_date > ?`,
+      [id, id, check_out, check_in]
     );
+    if (conflict.length > 0) return res.status(409).json({ error: 'Room already booked for those dates' });
+
+    await db.query(
+      `UPDATE reservation SET check_in_date = ?, check_out_date = ? WHERE reservation_id = ?`,
+      [check_in, check_out, id]
+    );
+
+    const [[room]] = await db.query(
+      `SELECT r.price FROM room r
+       JOIN reservation res ON r.room_id = res.room_id
+       WHERE res.reservation_id = ?`, [id]
+    );
+    const nights = Math.ceil((new Date(check_out) - new Date(check_in)) / (1000 * 60 * 60 * 24));
+    const total_bill = (room.price * nights).toFixed(2);
+
+    await db.query(
+      `UPDATE receipt SET clock_in = ?, clock_out = ?, total_bill = ? WHERE reservation_id = ?`,
+      [check_in, check_out, total_bill, id]
+    );
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Check active promotionals
-router.get('/promotionals', async (req, res) => {
+// cancel reservation
+router.delete('/reservation/:id', async (req, res) => {
+  const { id } = req.params;
+  const { customer_id } = req.body;
   try {
-    const [rows] = await db.query(
-      `SELECT * FROM promotional WHERE start_date <= CURDATE() AND end_date >= CURDATE()`
+    const [[res_check]] = await db.query(
+      `SELECT customer_id FROM reservation WHERE reservation_id = ?`, [id]
     );
-    res.json(rows);
+    if (!res_check) return res.status(404).json({ error: 'Reservation not found' });
+    if (res_check.customer_id != customer_id) return res.status(403).json({ error: 'Not your reservation' });
+
+    await db.query(`DELETE FROM receipt WHERE reservation_id = ?`, [id]);
+    await db.query(`DELETE FROM reservation WHERE reservation_id = ?`, [id]);
+
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
+router.put('/receipt/confirm/:reservation_id', async (req, res) => {
+  const { reservation_id } = req.params;
+  try {
+    await db.query(
+      `UPDATE reservation SET status = 'confirmed' WHERE reservation_id = ?`, [reservation_id]
+    );
+    await db.query(
+      `UPDATE receipt SET is_paid = 1 WHERE reservation_id = ?`, [reservation_id]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 module.exports = router;

@@ -85,6 +85,7 @@
                                 <a href="room.html" class="nav-item nav-link">Rooms</a>
                                 <a href="booking.html" class="nav-item nav-link active">Booking</a>
                                 <a href="team.html" class="nav-item nav-link">Our Team</a>
+                                <a href="my-reservation.html" class="nav-item nav-link">Edit reservation</a>
                             </div>
                             <div class="navbar-nav ms-auto py-0 pe-4" id="auth-nav">
                                 <!-- filled by JS -->
@@ -116,52 +117,6 @@
 
 
         <!-- Booking Start -->
-        <div class="container-fluid booking pb-5 wow fadeIn" data-wow-delay="0.1s">
-            <div class="container">
-                <div class="bg-white shadow" style="padding: 35px;">
-                    <div class="row g-2">
-                        <div class="col-md-10">
-                            <div class="row g-2">
-                                <div class="col-md-3">
-                                    <div class="date" id="date1" data-target-input="nearest">
-                                        <input type="text" class="form-control datetimepicker-input"
-                                            placeholder="Check in" data-target="#date1" data-toggle="datetimepicker" />
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="date" id="date2" data-target-input="nearest">
-                                        <input type="text" class="form-control datetimepicker-input" placeholder="Check out" data-target="#date2" data-toggle="datetimepicker"/>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <select class="form-select">
-                                        <option selected>Adult</option>
-                                        <option value="1">Adult 1</option>
-                                        <option value="2">Adult 2</option>
-                                        <option value="3">Adult 3</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <select class="form-select">
-                                        <option selected>Child</option>
-                                        <option value="1">Child 1</option>
-                                        <option value="2">Child 2</option>
-                                        <option value="3">Child 3</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <button class="btn btn-primary w-100">Submit</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Booking End -->
-
-
-        <!-- Booking Start -->
         <div class="container-xxl py-5">
             <div class="container">
                 <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
@@ -172,16 +127,16 @@
                     <div class="col-lg-6">
                         <div class="row g-3">
                             <div class="col-6 text-end">
-                                <img class="img-fluid rounded w-75 wow zoomIn" data-wow-delay="0.1s" src="img/about-1.jpg" style="margin-top: 25%;">
+                                <img class="img-fluid rounded w-75 wow zoomIn" data-wow-delay="0.1s" src="img/chisa.gif" style="margin-top: 25%;">
                             </div>
                             <div class="col-6 text-start">
-                                <img class="img-fluid rounded w-100 wow zoomIn" data-wow-delay="0.3s" src="img/about-2.jpg">
+                                <img class="img-fluid rounded w-100 wow zoomIn" data-wow-delay="0.3s" src="img/eat.gif">
                             </div>
                             <div class="col-6 text-end">
-                                <img class="img-fluid rounded w-50 wow zoomIn" data-wow-delay="0.5s" src="img/about-3.jpg">
+                                <img class="img-fluid rounded w-50 wow zoomIn" data-wow-delay="0.5s" src="img/cute.gif">
                             </div>
                             <div class="col-6 text-start">
-                                <img class="img-fluid rounded w-75 wow zoomIn" data-wow-delay="0.7s" src="img/about-4.jpg">
+                                <img class="img-fluid rounded w-75 wow zoomIn" data-wow-delay="0.7s" src="img/lova.gif">
                             </div>
                         </div>
                     </div>
@@ -246,12 +201,6 @@
                                         <div id="booked-dates-info" class="mt-1 ps-1"></div>
                                     </div>
                                     <div class="col-12">
-                                        <div class="form-floating">
-                                            <textarea class="form-control" placeholder="Special Request" id="message" style="height: 100px"></textarea>
-                                            <label for="message">Special Request</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-12">
                                         <a class="btn btn-primary w-100 py-3" onclick="requireLogin(event)">Book Now</a>
                                     </div>
                                 </div>
@@ -270,11 +219,8 @@
                 <div class="col-lg-10 border rounded p-1">
                     <div class="border rounded text-center p-1">
                         <div class="bg-white rounded text-center p-5">
-                            <h4 class="mb-4">Subscribe Our <span class="text-primary text-uppercase">Newsletter</span></h4>
-                            <div class="position-relative mx-auto" style="max-width: 400px;">
-                                <input class="form-control w-100 py-3 ps-4 pe-5" type="text" placeholder="Enter your email">
-                                <button type="button" class="btn btn-primary py-2 px-3 position-absolute top-0 end-0 mt-2 me-2">Submit</button>
-                            </div>
+                            <h4 class="mb-4">Thank you for <span class="text-primary text-uppercase">booking </span></h4>
+
                         </div>
                     </div>
                 </div>
@@ -400,7 +346,7 @@
                 const data = await res.json();
                 if (data.success) {
                     showToast('Booking confirmed! ✓');
-                    setTimeout(() => window.location.href = 'index.html', 1500);
+                    setTimeout(() => window.location.href = `receipt.html?reservation_id=${data.reservation_id}`, 1500);
                 } else {
                     showToast(data.error || 'Booking failed.', false);
                 }
@@ -424,6 +370,9 @@
             const res = await fetch(`/api/customer/reservation/booked-dates?room_id=${room_id}`);
             const dates = await res.json();
 
+            // define container FIRST before using it
+            const container = document.getElementById('booked-dates-info');
+
             // build disabled dates list
             const disabledDates = [];
             dates.forEach(({ check_in_date, check_out_date }) => {
@@ -435,32 +384,31 @@
                 }
             });
 
-            // reinitialize datepickers with disabled dates
+            // reinitialize datepickers
             $('#date3').datetimepicker('destroy');
             $('#date4').datetimepicker('destroy');
+            $('#date3').datetimepicker({ format: 'YYYY-MM-DD', minDate: moment(), disabledDates });
+            $('#date4').datetimepicker({ format: 'YYYY-MM-DD', minDate: moment(), disabledDates });
 
-            $('#date3').datetimepicker({
-                format: 'YYYY-MM-DD',
-                minDate: moment(),
-                disabledDates: disabledDates
-            });
-            $('#date4').datetimepicker({
-                format: 'YYYY-MM-DD',
-                minDate: moment(),
-                disabledDates: disabledDates
-            });
+            // filter past bookings
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const upcoming = dates.filter(d => new Date(d.check_out_date) > today);
 
-            // show booked periods in UI
-            const container = document.getElementById('booked-dates-info');
-            if (!dates.length) {
+            if (!upcoming.length) {
                 container.innerHTML = '<small class="text-success">✓ Room is available</small>';
                 return;
             }
+
+            const fmt = (dateStr) => new Date(dateStr).toLocaleDateString('en-GB', {
+                day: '2-digit', month: 'short', year: 'numeric'
+            });
+
             container.innerHTML = `
                 <small class="text-danger fw-bold">Booked periods:</small>
                 <ul class="mb-0 ps-3">
-                    ${dates.map(d => `
-                        <li><small class="text-danger">${d.check_in_date} → ${d.check_out_date}</small></li>
+                    ${upcoming.map(d => `
+                        <li><small class="text-danger">${fmt(d.check_in_date)} → ${fmt(d.check_out_date)}</small></li>
                     `).join('')}
                 </ul>
             `;

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>My Reservation - PHROVILLA</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="img/favicon.ico" rel="icon">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="lib/animate/animate.min.css" rel="stylesheet">
+    <link href="lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet"/>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="container-xxl bg-white p-0">
+
+    <!-- Spinner -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" style="width:3rem;height:3rem;" role="status"></div>
+    </div>
+
+    <!-- Header -->
+    <div class="container-fluid bg-dark px-0">
+        <div class="row gx-0">
+            <div class="col-lg-3 bg-dark d-none d-lg-block">
+                <a href="index.html" class="navbar-brand w-100 h-100 m-0 p-0 d-flex align-items-center justify-content-center">
+                    <h1 class="m-0 text-primary text-uppercase">PHROVILLA</h1>
+                </a>
+            </div>
+            <div class="col-lg-9">
+                <nav class="navbar navbar-expand-lg bg-dark navbar-dark p-3 p-lg-0">
+                    <a href="index.html" class="navbar-brand d-block d-lg-none">
+                        <h1 class="m-0 text-primary text-uppercase">PHROVILLA</h1>
+                    </a>
+                    <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+                        <div class="navbar-nav mr-auto py-0">
+                            <a href="index.html" class="nav-item nav-link">Home</a>
+                            <a href="room.html" class="nav-item nav-link">Rooms</a>
+                            <a href="booking.html" class="nav-item nav-link">Booking</a>
+                            <a href="team.html" class="nav-item nav-link">Our Team</a>
+                            <a href="my-reservation.html" class="nav-item nav-link active">Edit reservation</a>
+                        </div>
+                        <div class="navbar-nav ms-auto py-0 pe-4" id="auth-nav"></div>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="container-fluid page-header mb-5 p-0" style="background-image: url(img/carousel-1.jpg);">
+        <div class="container-fluid page-header-inner py-5">
+            <div class="container text-center pb-5">
+                <h1 class="display-3 text-white mb-3 animated slideInDown">My Reservation</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb justify-content-center text-uppercase">
+                        <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                        <li class="breadcrumb-item text-white active">My Reservation</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="container-xxl py-5 pb-5 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+
+                <!-- Search Box -->
+                <div class="shadow rounded p-4 mb-4 bg-white">
+                    <h5 class="text-primary text-uppercase mb-3">Find Your Reservation</h5>
+                    <div class="input-group">
+                        <input type="number" id="res-id-input" class="form-control form-control-lg"
+                            placeholder="Enter Receipt ID">
+                        <button class="btn btn-primary px-4" onclick="lookupReservation()">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                    <div id="lookup-error" class="text-danger mt-2 d-none"></div>
+                </div>
+
+                <!-- Reservation Card -->
+                <div id="reservation-card" class="d-none">
+
+                    <!-- Info -->
+                    <div class="shadow rounded p-4 mb-4 bg-white" id="res-info"></div>
+
+                    <!-- Edit Form -->
+                    <div class="shadow rounded p-4 mb-4 bg-white" id="edit-section">
+                        <h6 class="text-primary text-uppercase mb-3">Edit Dates</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating date" id="edit-date1" data-target-input="nearest">
+                                    <input type="text" class="form-control datetimepicker-input"
+                                        id="edit-checkin" placeholder="Check In"
+                                        data-target="#edit-date1" data-toggle="datetimepicker"/>
+                                    <label>Check In</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating date" id="edit-date2" data-target-input="nearest">
+                                    <input type="text" class="form-control datetimepicker-input"
+                                        id="edit-checkout" placeholder="Check Out"
+                                        data-target="#edit-date2" data-toggle="datetimepicker"/>
+                                    <label>Check Out</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-primary w-100 py-2" onclick="editReservation()">
+                                    <i class="fa fa-save me-2"></i>Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex gap-3" id="action-section">
+                        <a id="view-receipt-btn" href="#" class="btn btn-outline-primary py-2 px-4 flex-fill text-center">
+                            <i class="fa fa-receipt me-2"></i>View Receipt
+                        </a>
+                        <button class="btn btn-danger py-2 px-4 flex-fill" onclick="cancelReservation()">
+                            <i class="fa fa-times me-2"></i>Cancel Reservation
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <!-- Newsletter Start -->
+        <div class="container newsletter mt-5 wow fadeIn" data-wow-delay="0.1s">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 border rounded p-1">
+                    <div class="border rounded text-center p-1">
+                        <div class="bg-white rounded text-center p-5">
+                            <h4 class="mb-4">Thank you for <span class="text-primary text-uppercase">booking </span></h4>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!-- Newsletter Start -->
+
+    <!-- Footer Start -->
+        <div class="container-fluid bg-dark text-light footer wow fadeIn" data-wow-delay="0.1s">
+            <div class="container pb-5">
+                <div class="row g-5">
+                    <div class="col-md-6 col-lg-4">
+                        <div class="bg-primary rounded p-4">
+                            <a href="index.html"><h1 class="text-white text-uppercase mb-3">Hotelier</h1></a>
+                            <p class="text-white mb-0">
+								Download <a class="text-dark fw-medium" href="https://htmlcodex.com/hotel-html-template-pro">Hotelier – Premium Version</a>, build a professional website for your hotel business and grab the attention of new visitors upon your site’s launch.
+							</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <h6 class="section-title text-start text-primary text-uppercase mb-4">Contact</h6>
+                        <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>42p Street, Phnom Penh, Cambodia</p>
+                        <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+855 1 67890</p>
+                        <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@example.com</p>
+                        <div class="d-flex pt-2">
+                            <a class="btn btn-outline-light btn-social" href="https://github.com/i-eat-tea"><i class="fab fa-github"></i></a>
+                            <a class="btn btn-outline-light btn-social" href="https://www.linkedin.com/in/ly-laisrun-139275333/"><i class="fab fa-linkedin-in"></i></a>
+                            <a class="btn btn-square btn-primary mx-1btn btn-outline-light btn-social" href="https://t.me/LY_Laisrun"><i class="fab fa-telegram"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-5 col-md-12">
+                        <div class="row gy-5 g-4">
+                            <div class="col-md-6">
+                                <h6 class="section-title text-start text-primary text-uppercase mb-4">Company</h6>
+                                <a class="btn btn-link" href="">About Us</a>
+                                <a class="btn btn-link" href="">Contact Us</a>
+                                <a class="btn btn-link" href="">Privacy Policy</a>
+                                <a class="btn btn-link" href="">Terms & Condition</a>
+                                <a class="btn btn-link" href="">Support</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <div class="copyright">
+                    <div class="row">
+                        <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                            &copy; <a class="border-bottom" href="#">PHROVILLA</a>, All Right Reserved. 
+                            
+                            <!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
+                            Designed By <a class="border-bottom" href="https://htmlcodex.com">HTML Codex</a>
+                            <br>Distributed By: <a class="border-bottom" href="https://themewagon.com" target="_blank">ThemeWagon</a>
+
+
+        <!-- Back to Top -->
+        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+        <!-- Toast -->
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+            <div id="bookingToast" class="toast align-items-center text-white bg-primary border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body fs-6" id="toastMsg">Booking confirmed!</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+        <div id="resToast" class="toast align-items-center text-white border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body fs-6" id="resToastMsg"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="lib/wow/wow.min.js"></script>
+<script src="lib/easing/easing.min.js"></script>
+<script src="lib/waypoints/waypoints.min.js"></script>
+<script src="lib/tempusdominus/js/moment.min.js"></script>
+<script src="lib/tempusdominus/js/moment-timezone.min.js"></script>
+<script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
+<script src="js/main.js"></script>
+
+<script>
+let currentReservation = null;
+
+const fmt = (dateStr) => new Date(dateStr).toLocaleDateString('en-GB', {
+    day: '2-digit', month: 'short', year: 'numeric'
+});
+
+function showToast(msg, success = true) {
+    const toast = document.getElementById('resToast');
+    document.getElementById('resToastMsg').textContent = msg;
+    toast.className = `toast align-items-center text-white border-0 ${success ? 'bg-primary' : 'bg-danger'}`;
+    new bootstrap.Toast(toast, { delay: 3000 }).show();
+}
+
+async function lookupReservation() {
+    const id = document.getElementById('res-id-input').value.trim();
+    const errEl = document.getElementById('lookup-error');
+    errEl.classList.add('d-none');
+
+    if (!id) {
+        errEl.textContent = 'Please enter a reservation ID.';
+        errEl.classList.remove('d-none');
+        return;
+    }
+
+    const customer = JSON.parse(localStorage.getItem('customer'));
+    if (!customer) {
+        errEl.textContent = 'Please sign in first.';
+        errEl.classList.remove('d-none');
+        return;
+    }
+
+    try {
+        const res = await fetch(`http://localhost:3000/api/customer/reservation/by-receipt/${id}`);
+        const data = await res.json();
+
+        if (data.error) {
+            errEl.textContent = data.error;
+            errEl.classList.remove('d-none');
+            document.getElementById('reservation-card').classList.add('d-none');
+            return;
+        }
+
+        // verify it belongs to this customer
+        if (data.customer_id != customer.customer_id) {
+            errEl.textContent = 'This reservation does not belong to your account.';
+            errEl.classList.remove('d-none');
+            document.getElementById('reservation-card').classList.add('d-none');
+            return;
+        }
+
+        currentReservation = data;
+        renderReservation(data);
+
+    } catch (err) {
+        errEl.textContent = 'Failed to find reservation.';
+        errEl.classList.remove('d-none');
+    }
+}
+
+function renderReservation(d) {
+    const nights = Math.ceil(
+        (new Date(d.check_out_date) - new Date(d.check_in_date)) / (1000 * 60 * 60 * 24)
+    );
+    const isPaid = d.is_paid == 1;
+
+    document.getElementById('res-info').innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="text-primary text-uppercase mb-0">Reservation #${d.reservation_id}</h5>
+            <span class="badge ${d.status === 'confirmed' ? 'bg-success' : d.status === 'cancelled' ? 'bg-danger' : 'bg-warning text-dark'} py-2 px-3">
+                ${d.status}
+            </span>
+        </div>
+        <hr>
+        <div class="row g-3">
+            <div class="col-6">
+                <small class="text-muted">Guest</small>
+                <p class="fw-bold mb-0">${d.name}</p>
+            </div>
+            <div class="col-6">
+                <small class="text-muted">Room</small>
+                <p class="fw-bold mb-0">No. ${d.number} — ${d.type}</p>
+            </div>
+            <div class="col-4">
+                <small class="text-muted">Check In</small>
+                <p class="fw-bold mb-0">${fmt(d.check_in_date)}</p>
+            </div>
+            <div class="col-4">
+                <small class="text-muted">Check Out</small>
+                <p class="fw-bold mb-0">${fmt(d.check_out_date)}</p>
+            </div>
+            <div class="col-4">
+                <small class="text-muted">Nights</small>
+                <p class="fw-bold mb-0">${nights}</p>
+            </div>
+        </div>
+        ${isPaid ? '<div class="alert alert-success mt-3 mb-0">✓ This reservation has been paid and confirmed.</div>' : ''}
+    `;
+
+    // hide edit form and cancel if paid
+    document.querySelector('.shadow.rounded.p-4.mb-4.bg-white:nth-child(2)');
+    const editSection = document.getElementById('edit-section');
+    const actionSection = document.getElementById('action-section');
+
+    if (isPaid) {
+        editSection.classList.add('d-none');
+        actionSection.innerHTML = `
+            <a href="receipt.html?reservation_id=${d.reservation_id}" 
+               class="btn btn-outline-primary py-2 px-4 flex-fill text-center">
+                <i class="fa fa-receipt me-2"></i>View Receipt
+            </a>
+        `;
+    } else {
+        editSection.classList.remove('d-none');
+        document.getElementById('view-receipt-btn').href = `receipt.html?reservation_id=${d.reservation_id}`;
+    }
+
+    // datepickers
+    $('#edit-date1').datetimepicker('destroy');
+    $('#edit-date2').datetimepicker('destroy');
+    $('#edit-date1').datetimepicker({ format: 'YYYY-MM-DD', minDate: moment(), defaultDate: moment(d.check_in_date).format('YYYY-MM-DD') });
+    $('#edit-date2').datetimepicker({ format: 'YYYY-MM-DD', minDate: moment(), defaultDate: moment(d.check_out_date).format('YYYY-MM-DD') });
+
+    document.getElementById('reservation-card').classList.remove('d-none');
+}
+async function editReservation() {
+    const check_in  = document.getElementById('edit-checkin').value;
+    const check_out = document.getElementById('edit-checkout').value;
+    const customer  = JSON.parse(localStorage.getItem('customer'));
+
+    if (!check_in || !check_out) {
+        showToast('Please select both dates.', false);
+        return;
+    }
+
+    try {
+        const res = await fetch(`http://localhost:3000/api/customer/reservation/${currentReservation.reservation_id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ check_in, check_out, customer_id: customer.customer_id })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showToast('Reservation updated! ✓');
+            // refresh
+            setTimeout(() => lookupReservation(), 1000);
+        } else {
+            showToast(data.error || 'Update failed.', false);
+        }
+    } catch (err) {
+        showToast('Server error.', false);
+    }
+}
+
+async function cancelReservation() {
+    if (!confirm('Are you sure you want to cancel this reservation? This cannot be undone.')) return;
+
+    const customer = JSON.parse(localStorage.getItem('customer'));
+
+    try {
+        const res = await fetch(`http://localhost:3000/api/customer/reservation/${currentReservation.reservation_id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ customer_id: customer.customer_id })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showToast('Reservation cancelled.');
+            document.getElementById('reservation-card').classList.add('d-none');
+            document.getElementById('res-id-input').value = '';
+        } else {
+            showToast(data.error || 'Cancel failed.', false);
+        }
+    } catch (err) {
+        showToast('Server error.', false);
+    }
+}
+
+// allow pressing Enter to search
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('res-id-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') lookupReservation();
+    });
+});
+</script>
+</body>
+</html>
