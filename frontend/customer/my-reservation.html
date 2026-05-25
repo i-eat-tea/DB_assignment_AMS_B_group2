@@ -264,8 +264,11 @@ async function lookupReservation() {
     }
 
     try {
+        
         const res = await fetch(`http://localhost:3000/api/customer/reservation/by-receipt/${id}`);
         const data = await res.json();
+        console.log(data); // add this
+        console.log('customer_id match:', data.customer_id, customer.customer_id);
 
         if (data.error) {
             errEl.textContent = data.error;
@@ -345,14 +348,37 @@ function renderReservation(d) {
         `;
     } else {
         editSection.classList.remove('d-none');
-        document.getElementById('view-receipt-btn').href = `receipt.html?reservation_id=${d.reservation_id}`;
+        // in renderReservation, change receipt link
+        document.getElementById('view-receipt-btn').href = `receipt.html?reservation_id=${d.reservation_id}`;   
     }
 
     // datepickers
     $('#edit-date1').datetimepicker('destroy');
     $('#edit-date2').datetimepicker('destroy');
-    $('#edit-date1').datetimepicker({ format: 'YYYY-MM-DD', minDate: moment(), defaultDate: moment(d.check_in_date).format('YYYY-MM-DD') });
-    $('#edit-date2').datetimepicker({ format: 'YYYY-MM-DD', minDate: moment(), defaultDate: moment(d.check_out_date).format('YYYY-MM-DD') });
+
+    document.getElementById('edit-checkin').value = d.check_in_date;
+    document.getElementById('edit-checkout').value = d.check_out_date;
+
+    $('#edit-date1').datetimepicker({ 
+        format: 'YYYY-MM-DD', 
+        minDate: moment().add(1, 'days').startOf('day'),
+        pickTime: false
+    });
+    $('#edit-date2').datetimepicker({ 
+        format: 'YYYY-MM-DD', 
+        minDate: moment().add(2, 'days').startOf('day'),
+        pickTime: false
+    });
+
+    $('#edit-date1').on('change.datetimepicker', function(e) {
+        if (e.date) {
+            $('#edit-date2').datetimepicker('minDate', e.date.clone().startOf('day').add(1, 'days'));
+            document.getElementById('edit-checkout').value = '';
+        }
+    });
+    $('#edit-date2').on('change.datetimepicker', function(e) {
+        if (e.date) $('#edit-date1').datetimepicker('maxDate', e.date.clone().startOf('day').subtract(1, 'days'));
+    });
 
     document.getElementById('reservation-card').classList.remove('d-none');
 }

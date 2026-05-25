@@ -329,8 +329,20 @@
             const room_id   = new URLSearchParams(window.location.search).get('room_id')
                                 || document.getElementById('select3').value;
 
-            if (!check_in || !check_out) {
-                showToast('Please select check-in and check-out dates.', false);
+            if (!check_in) {
+                showToast('Please select a check-in date.', false);
+                return;
+            }
+            if (!check_out) {
+                showToast('Please select a check-out date.', false);
+                return;
+            }
+            if (!room_id) {
+                showToast('Please select a room.', false);
+                return;
+            }
+            if (new Date(check_in) >= new Date(check_out)) {
+                showToast('Check-out date must be after check-in date.', false);
                 return;
             }
 
@@ -347,11 +359,13 @@
                 if (data.success) {
                     showToast('Booking confirmed! ✓');
                     setTimeout(() => window.location.href = `receipt.html?reservation_id=${data.reservation_id}`, 1500);
+                } else if (res.status === 409) {
+                    showToast('Room already booked for those dates. Please choose different dates.', false);
                 } else {
-                    showToast(data.error || 'Booking failed.', false);
+                    showToast(data.error || 'Booking failed. Please try again.', false);
                 }
             } catch (err) {
-                showToast('Server error.', false);
+                showToast('Unable to connect to server. Please try again later.', false);
             }
         }
         async function loadRooms() {
@@ -385,10 +399,20 @@
             });
 
             // reinitialize datepickers
-            $('#date3').datetimepicker('destroy');
-            $('#date4').datetimepicker('destroy');
-            $('#date3').datetimepicker({ format: 'YYYY-MM-DD', minDate: moment(), disabledDates });
-            $('#date4').datetimepicker({ format: 'YYYY-MM-DD', minDate: moment(), disabledDates });
+            
+        $('#date3').datetimepicker('destroy');
+        $('#date4').datetimepicker('destroy');
+        document.getElementById('checkin').value = '';  // clear checkin
+        document.getElementById('checkout').value = ''; // clear checkout
+        $('#date3').datetimepicker({ format: 'YYYY-MM-DD', minDate: moment().add(0, 'days').startOf('day'), disabledDates, pickTime: false });
+        $('#date4').datetimepicker({ format: 'YYYY-MM-DD', minDate: moment().add(1, 'days').startOf('day'), disabledDates, pickTime: false });
+
+        $('#date3').on('change.datetimepicker', function(e) {
+            if (e.date) $('#date4').datetimepicker('minDate', e.date.clone().startOf('day').add(0, 'days'));
+        });
+        $('#date4').on('change.datetimepicker', function(e) {
+            if (e.date) $('#date3').datetimepicker('maxDate', e.date.clone().startOf('day').subtract(1, 'days'));
+        });
 
             // filter past bookings
             const today = new Date();
@@ -417,8 +441,21 @@
         // reload booked dates when room selection changes
        document.addEventListener('DOMContentLoaded', () => {
             // init datepickers once
-            $('#date3').datetimepicker({ format: 'YYYY-MM-DD', minDate: moment() });
-            $('#date4').datetimepicker({ format: 'YYYY-MM-DD', minDate: moment() });
+            $('#date3').datetimepicker({ format: 'YYYY-MM-DD', minDate: moment().add(0, 'days').startOf('day'), pickTime: false });
+            $('#date4').datetimepicker({ format: 'YYYY-MM-DD', minDate: moment().add(1, 'days').startOf('day'), pickTime: false });
+            $('#date3').on('change.datetimepicker', function(e) {
+                if (e.date) {
+                    const nextDay = e.date.clone().startOf('day').add(1, 'days');
+                    $('#date4').datetimepicker('minDate', nextDay);
+                    $('#date4').datetimepicker('date', null); // clear checkout when checkin changes
+                }
+            });
+            $('#date4').on('change.datetimepicker', function(e) {
+                if (e.date) {
+                    $('#date3').datetimepicker('maxDate', e.date.clone().startOf('day').subtract(1, 'days'));
+                }
+            });
+ 
 
             loadRooms();
 

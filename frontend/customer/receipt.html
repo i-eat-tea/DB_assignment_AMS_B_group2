@@ -267,18 +267,11 @@ async function loadReceipt() {
     }
 }
 // add this function
-async function showQR(reservation_id) {
-    const btn = document.getElementById('qr-btn');
-    btn.textContent = 'Loading...';
-    btn.disabled = true;
-
-    const res  = await fetch(`http://localhost:3000/api/customer/receipt/qr/${reservation_id}`);
-    const data = await res.json();
-
+function showQR(reservation_id) {
     document.getElementById('qr-container').innerHTML = `
         <div class="text-center mt-4 p-4 border rounded">
-            <p class="text-muted mb-2">Scan to pay $${data.amount}</p>
-            <img src="${data.qr}" alt="KHQR" style="width:220px;">
+            <p class="text-muted mb-2">Scan to pay</p>
+            <img src="img/my_qr.png" alt="Payment QR" style="width:220px;">
             <p class="text-muted mt-2 small">Scan with ABA, ACLEDA, or any Bakong app</p>
             <button onclick="markPaid(${reservation_id})" class="btn btn-success mt-2 w-100">
                 ✓ I've Paid
@@ -286,7 +279,6 @@ async function showQR(reservation_id) {
         </div>
     `;
 }
-
 async function markPaid(reservation_id) {
     const res  = await fetch(`http://localhost:3000/api/customer/receipt/confirm/${reservation_id}`, { method: 'PUT' });
     const data = await res.json();
