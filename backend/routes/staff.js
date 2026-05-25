@@ -8,12 +8,26 @@ router.use(requireStaff);
 // ── Reservations ─────────────────────────────────────────────
 
 // View all reservations with filters
+
+// View all reservations with filters
 router.get('/reservations', async (req, res) => {
   const { status, room_type, date } = req.query;
-  let query = `SELECT res.*, c.first_name, c.last_name, r.number, r.type
+  let query = `SELECT 
+                res.reservation_id, 
+                res.check_in_date, 
+                res.check_out_date, 
+                res.status,
+                c.customer_id, 
+                c.name AS customer_name,
+                c.email,
+                r.room_id,
+                r.number AS room_number, 
+                r.type, 
+                r.price
                FROM reservation res
                JOIN customer c ON res.customer_id = c.customer_id
-               JOIN room r ON res.room_id = r.room_id WHERE 1=1`;
+               JOIN room r ON res.room_id = r.room_id 
+               WHERE 1=1`;
   const params = [];
   if (status) { query += ' AND res.status = ?'; params.push(status); }
   if (room_type) { query += ' AND r.type = ?'; params.push(room_type); }
@@ -26,7 +40,6 @@ router.get('/reservations', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 // Confirm reservation
 router.put('/reservation/:id/confirm', async (req, res) => {
   try {
@@ -269,5 +282,28 @@ router.put('/promotional/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
+// Get all promotions
+router.get('/promotional', async (req, res) => {
+  try {
+    const [rows] = await db.query(`SELECT * FROM promotional ORDER BY start_date DESC`);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+// Get all rooms (for staff)
+router.get('/rooms', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT r.*, a.has_wifi, a.bedroom_amount, a.bathroom_amount
+       FROM room r
+       LEFT JOIN amenities a ON r.room_id = a.room_id
+       WHERE r.hotel_id = ?`,
+      [req.staff?.hotel_id || 1] // adjust if you have staff.hotel_id from token
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 module.exports = router;

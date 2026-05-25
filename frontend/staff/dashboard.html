@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manager Dashboard | Hotel AMS-B</title>
+  <link href="img/favicon.ico" rel="icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #1D9E75;
+      --primary-dark: #0F6E56;
+      --primary-light: #E1F5EE;
+      --bg: #F7F8F6;
+      --surface: #FFFFFF;
+      --surface-2: #F1F3F0;
+      --text: #1A1D1A;
+      --text-muted: #6B7068;
+      --border: #E2E6E0;
+      --sidebar-w: 220px;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Layout ── */
+    .shell { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .sidebar-brand {
+      padding: 20px 18px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-brand .hotel-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--primary-dark);
+      letter-spacing: -0.3px;
+    }
+    .sidebar-brand .hotel-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'IBM Plex Mono', monospace;
+      margin-top: 2px;
+    }
+
+    .nav-section { padding: 12px 10px 4px; }
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0 8px;
+      margin-bottom: 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 400;
+      cursor: pointer;
+      color: var(--text-muted);
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      transition: background 0.12s, color 0.12s;
+      margin-bottom: 1px;
+    }
+    .nav-item i { font-size: 14px; width: 16px; text-align: center; }
+    .nav-item:hover { background: var(--surface-2); color: var(--text); }
+    .nav-item.active {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-weight: 500;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 12px 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Main ── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .page-title { font-size: 15px; font-weight: 600; color: var(--text); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .staff-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 10px 5px 5px;
+      border-radius: 20px;
+      background: var(--surface-2);
+      font-size: 13px;
+      color: var(--text);
+    }
+    .avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary-dark);
+    }
+    .btn-logout {
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.12s;
+    }
+    .btn-logout:hover { background: var(--surface-2); color: var(--text); }
+
+    /* ── Content ── */
+    .content { flex: 1; overflow-y: auto; padding: 24px; }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ── Section header ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .section-title { font-size: 15px; font-weight: 600; }
+
+    /* ── Buttons ── */
+    .btn {
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      cursor: pointer;
+      background: var(--surface);
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.12s;
+    }
+    .btn:hover { background: var(--surface-2); }
+    .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+    .btn-danger { color: #9B2335; border-color: #F5C2C7; }
+    .btn-danger:hover { background: #FFF0F2; }
+    .btn-success { color: #2B5E38; border-color: #A3D9B1; }
+    .btn-success:hover { background: #EDF7F0; }
+
+    /* ── Stats grid ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+    .stat-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stat-value { font-size: 32px; font-weight: 600; color: var(--primary); line-height: 1; }
+
+    /* ── Table ── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .table-toolbar {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    tbody td {
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #FAFBFA; }
+    .cell-muted { color: var(--text-muted); font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .badge-pending { background: #FEF3CD; color: #7D5A00; }
+    .badge-confirmed { background: var(--primary-light); color: var(--primary-dark); }
+    .badge-cancelled { background: #FDE8E8; color: #9B2335; }
+    .badge-completed { background: #EAF3DE; color: #2B5E38; }
+    .badge-manager { background: var(--primary-light); color: var(--primary-dark); }
+    .badge-cashier { background: #E6F1FB; color: #0C447C; }
+    .badge-house_keeping { background: #F0EBF8; color: #4A2D7A; }
+    .badge-neutral { background: var(--surface-2); color: var(--text-muted); }
+
+    /* ── Action buttons ── */
+    .action-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 4px 6px;
+      border-radius: 6px;
+      font-size: 13px;
+      transition: background 0.12s, color 0.12s;
+    }
+    .action-btn:hover { background: var(--surface-2); color: var(--text); }
+    .action-btn.success:hover { background: #EDF7F0; color: #2B5E38; }
+    .action-btn.danger:hover { background: #FFF0F2; color: #9B2335; }
+    .action-btn.warning:hover { background: #FEF9ED; color: #7D5A00; }
+
+    /* ── Filter select ── */
+    .filter-select {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+    }
+
+    /* ── Reports ── */
+    .reports-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+    .report-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .report-card .r-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+    .report-card .r-value { font-size: 22px; font-weight: 600; color: var(--primary); }
+
+    .section-sub {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 20px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-sub i { color: var(--text-muted); }
+
+    /* ── Check-in/out ── */
+    .ci-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-input {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 13px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      margin-bottom: 10px;
+    }
+    .form-input:focus { outline: none; border-color: var(--primary); }
+    .result-box {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+      min-height: 90px;
+    }
+
+    /* ── Blacklist ── */
+    .bl-form { max-width: 380px; }
+    .input-row { display: flex; gap: 8px; }
+    .input-row .form-input { margin-bottom: 0; }
+    .hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+    /* ── Divider ── */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="hotel-name">🏨 Hotel AMS-B</div>
+      <div class="hotel-sub">Manager Console</div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Operations</div>
+      <button class="nav-item active" onclick="switchTab('reservations', this)">
+        <i class="fas fa-calendar-check"></i> Reservations
+      </button>
+      <button class="nav-item" onclick="switchTab('rooms', this)">
+        <i class="fas fa-door-open"></i> Rooms
+      </button>
+      <button class="nav-item" onclick="switchTab('checkinout', this)">
+        <i class="fas fa-exchange-alt"></i> Check-in / out
+      </button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Management</div>
+      <button class="nav-item" onclick="switchTab('staff', this)">
+        <i class="fas fa-users"></i> Staff
+      </button>
+      <button class="nav-item" onclick="switchTab('promotions', this)">
+        <i class="fas fa-tags"></i> Promotions
+      </button>
+      <button class="nav-item" onclick="switchTab('customers', this)">
+        <i class="fas fa-user-slash"></i> Blacklist
+      </button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Analytics</div>
+      <button class="nav-item" onclick="switchTab('reports', this)">
+        <i class="fas fa-chart-line"></i> Reports
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="btn-logout w-100" id="logoutBtn">
+        <i class="fas fa-sign-out-alt"></i> Sign out
+      </button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="page-title" id="pageTitle">Reservations</span>
+      </div>
+      <div class="topbar-right">
+        <div class="staff-pill">
+          <div class="avatar" id="avatarInitials">M</div>
+          <span id="staffName">Manager</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- RESERVATIONS -->
+      <div class="tab-pane active" id="tab-reservations">
+        <div class="section-header">
+          <span class="section-title">All Reservations</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select id="resFilterStatus" class="filter-select">
+              <option value="">All status</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="completed">Completed</option>
+            </select>
+            <button class="btn btn-sm" onclick="loadReservations()">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th><th>Customer</th><th>Room</th>
+                <th>Check-in</th><th>Check-out</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="reservationsBody">
+              <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ROOMS -->
+      <div class="tab-pane" id="tab-rooms">
+        <div class="section-header">
+          <span class="section-title">Room Management</span>
+          <button class="btn btn-primary btn-sm" onclick="alert('Add room – implement modal')">
+            <i class="fas fa-plus"></i> Add Room
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Number</th><th>Type</th><th>Price</th><th>Capacity</th><th>Condition</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="roomsBody">
+              <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- STAFF -->
+      <div class="tab-pane" id="tab-staff">
+        <div class="section-header">
+          <span class="section-title">Staff Directory</span>
+          <button class="btn btn-primary btn-sm" onclick="alert('Add staff – implement modal')">
+            <i class="fas fa-user-plus"></i> Add Staff
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Name</th><th>Contact</th><th>Role</th><th>Status</th><th>Salary</th><th>Penalty</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="staffBody">
+              <tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:32px">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PROMOTIONS -->
+      <div class="tab-pane" id="tab-promotions">
+        <div class="section-header">
+          <span class="section-title">Promotions</span>
+          <button class="btn btn-primary btn-sm" onclick="alert('Create promotion – implement modal')">
+            <i class="fas fa-plus"></i> Create Promotion
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Statement</th><th>Discount</th><th>Start Date</th><th>End Date</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="promoBody">
+              <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:32px">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- REPORTS -->
+      <div class="tab-pane" id="tab-reports">
+        <div class="section-header">
+          <span class="section-title">Operational Reports</span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label"><i class="fas fa-building"></i> Total Rooms</div>
+            <div class="stat-value" id="statRooms">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><i class="fas fa-users"></i> Staff Count</div>
+            <div class="stat-value" id="statStaff">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><i class="fas fa-calendar-week"></i> Reservations</div>
+            <div class="stat-value" id="statReservations">-</div>
+          </div>
+        </div>
+
+        <div class="section-sub"><i class="fas fa-chart-bar"></i> Occupancy Report</div>
+        <div class="table-wrap" style="margin-bottom:12px">
+          <table>
+            <thead><tr><th>Room Type</th><th>Condition</th><th>Count</th></tr></thead>
+            <tbody id="occupancyBody">
+              <tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:20px">Click refresh</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <button class="btn btn-sm" onclick="loadOccupancyReport()">
+          <i class="fas fa-sync-alt"></i> Refresh Occupancy
+        </button>
+
+        <hr class="divider">
+
+        <div class="section-sub"><i class="fas fa-dollar-sign"></i> Revenue Report</div>
+        <div class="reports-grid">
+          <div class="report-card"><div class="r-label">Total Revenue</div><div class="r-value" id="totalRevenue">$0</div></div>
+          <div class="report-card"><div class="r-label">Receipts</div><div class="r-value" id="totalReceipts">0</div></div>
+          <div class="report-card"><div class="r-label">Average Bill</div><div class="r-value" id="avgBill">$0</div></div>
+          <div class="report-card"><div class="r-label">Highest Bill</div><div class="r-value" id="maxBill">$0</div></div>
+        </div>
+        <button class="btn btn-sm" onclick="loadRevenueReport()">
+          <i class="fas fa-sync-alt"></i> Refresh Revenue
+        </button>
+
+        <hr class="divider">
+
+        <div class="section-sub"><i class="fas fa-chart-line"></i> Descriptive Statistics</div>
+        <div class="reports-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="report-card"><div class="r-label">Avg Stay (nights)</div><div class="r-value" id="avgStay">-</div></div>
+          <div class="report-card"><div class="r-label">Total Reservations</div><div class="r-value" id="totalReservations">-</div></div>
+          <div class="report-card">
+            <div class="r-label">Completed</div>
+            <div class="r-value" id="completedRes">-</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px" id="cancelledRes"></div>
+          </div>
+        </div>
+        <button class="btn btn-sm" onclick="loadDescriptiveStats()">
+          <i class="fas fa-sync-alt"></i> Refresh Stats
+        </button>
+      </div>
+
+      <!-- BLACKLIST -->
+      <div class="tab-pane" id="tab-customers">
+        <div class="section-header">
+          <span class="section-title">Blacklist Customer</span>
+        </div>
+        <div class="bl-form">
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">
+            Enter a customer ID to flag their account and restrict future bookings.
+          </p>
+          <div class="input-row">
+            <input type="number" id="blacklistCustomerId" class="form-input" placeholder="Customer ID">
+            <button class="btn btn-danger" onclick="blacklistCustomer()">
+              <i class="fas fa-ban"></i> Blacklist
+            </button>
+          </div>
+          <p class="hint">Use the customer_id visible in the reservations table.</p>
+        </div>
+      </div>
+
+      <!-- CHECK-IN/OUT -->
+      <div class="tab-pane" id="tab-checkinout">
+        <div class="section-header">
+          <span class="section-title">Check-in / Check-out</span>
+        </div>
+        <div class="ci-grid">
+          <div>
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">
+              Enter a reservation ID to process check-in or generate a bill on check-out.
+            </p>
+            <input type="number" id="checkReservationId" class="form-input" placeholder="Reservation ID">
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-success" onclick="performCheckin()">
+                <i class="fas fa-sign-in-alt"></i> Check-in
+              </button>
+              <button class="btn" onclick="performCheckout()">
+                <i class="fas fa-sign-out-alt"></i> Check-out & Bill
+              </button>
+            </div>
+          </div>
+          <div>
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">Result</p>
+            <div class="result-box" id="checkoutResult">No action yet.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const API_BASE = '/api/staff';
+  let token = localStorage.getItem('staff_token');
+  let staffData = JSON.parse(localStorage.getItem('staff') || '{}');
+
+  const TAB_TITLES = {
+    reservations: 'Reservations',
+    rooms: 'Room Management',
+    staff: 'Staff Directory',
+    promotions: 'Promotions',
+    reports: 'Reports',
+    customers: 'Blacklist',
+    checkinout: 'Check-in / Check-out'
+  };
+
+  function switchTab(name, el) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    el.classList.add('active');
+    document.getElementById('pageTitle').textContent = TAB_TITLES[name] || name;
+    if (name === 'reservations') loadReservations();
+    else if (name === 'rooms') loadRooms();
+    else if (name === 'staff') loadStaff();
+    else if (name === 'promotions') loadPromotions();
+    else if (name === 'reports') { loadOccupancyReport(); loadRevenueReport(); loadDescriptiveStats(); }
+  }
+
+  async function apiFetch(endpoint, options = {}) {
+    const headers = { 'Content-Type': 'application/json', 'x-staff-token': token, ...(options.headers || {}) };
+    const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
+    return res.json();
+  }
+
+  async function loadReservations() {
+    const status = document.getElementById('resFilterStatus').value;
+    const url = '/reservations' + (status ? `?status=${status}` : '');
+    try {
+      const data = await apiFetch(url);
+      const tbody = document.getElementById('reservationsBody');
+      if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px">No reservations found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(r => `
+        <tr>
+          <td class="cell-muted">#${r.reservation_id}</td>
+          <td>${r.customer_name || r.name || 'N/A'}</td>
+          <td>${r.room_number || r.number} <span style="color:var(--text-muted)">(${r.type})</span></td>
+          <td class="cell-muted">${r.check_in_date}</td>
+          <td class="cell-muted">${r.check_out_date}</td>
+          <td><span class="badge badge-${r.status}">${r.status}</span></td>
+          <td>
+            ${r.status === 'pending' ? `<button class="action-btn success" onclick="confirmRes(${r.reservation_id})" title="Confirm"><i class="fas fa-check-circle"></i></button>` : ''}
+            ${(r.status === 'pending' || r.status === 'confirmed') ? `<button class="action-btn danger" onclick="cancelRes(${r.reservation_id})" title="Cancel"><i class="fas fa-times-circle"></i></button>` : ''}
+          </td>
+        </tr>`).join('');
+    } catch (e) {
+      document.getElementById('reservationsBody').innerHTML = `<tr><td colspan="7" style="text-align:center;color:#9B2335;padding:32px">Error: ${e.message}</td></tr>`;
+    }
+  }
+
+  async function confirmRes(id) { try { await apiFetch(`/reservation/${id}/confirm`, { method: 'PUT' }); loadReservations(); } catch (e) { alert(e.message); } }
+  async function cancelRes(id) { try { await apiFetch(`/reservation/${id}/cancel`, { method: 'PUT' }); loadReservations(); } catch (e) { alert(e.message); } }
+
+  async function loadRooms() {
+    try {
+      const rooms = await apiFetch('/rooms');
+      document.getElementById('roomsBody').innerHTML = rooms.map(r => `
+        <tr>
+          <td class="cell-muted">#${r.room_id}</td>
+          <td>${r.number}</td>
+          <td>${r.type}</td>
+          <td>$${r.price}</td>
+          <td>${r.capacity}</td>
+          <td><span class="badge badge-neutral">${r.conditions}</span></td>
+          <td>
+            <button class="action-btn" onclick="alert('Edit room ${r.room_id}')" title="Edit"><i class="fas fa-edit"></i></button>
+            <button class="action-btn warning" onclick="updateRoomCondition(${r.room_id})" title="Change condition"><i class="fas fa-wrench"></i></button>
+          </td>
+        </tr>`).join('');
+    } catch (e) {
+      document.getElementById('roomsBody').innerHTML = `<tr><td colspan="7" style="text-align:center;color:#9B2335;padding:32px">Error: ${e.message}</td></tr>`;
+    }
+  }
+
+  function updateRoomCondition(id) {
+    const c = prompt('New condition (free, occupied, repairing):');
+    if (c) apiFetch(`/room/${id}/conditions`, { method: 'PUT', body: JSON.stringify({ conditions: c }) }).then(() => loadRooms());
+  }
+
+  async function loadStaff() {
+    try {
+      const staff = await apiFetch('/staff');
+      document.getElementById('staffBody').innerHTML = staff.map(s => `
+        <tr>
+          <td class="cell-muted">#${s.staff_id}</td>
+          <td>${s.first_name} ${s.last_name}</td>
+          <td class="cell-muted">${s.contact_number}</td>
+          <td><span class="badge badge-${s.role}">${s.role}</span></td>
+          <td>${s.conditions}</td>
+          <td>$${s.salary}</td>
+          <td>${s.penalty_point || 0}</td>
+          <td>
+            <button class="action-btn" onclick="alert('Edit staff ${s.staff_id}')" title="Edit"><i class="fas fa-edit"></i></button>
+            <button class="action-btn warning" onclick="addPenalty(${s.staff_id})" title="Add penalty"><i class="fas fa-exclamation-triangle"></i></button>
+          </td>
+        </tr>`).join('');
+    } catch (e) {
+      document.getElementById('staffBody').innerHTML = `<tr><td colspan="8" style="text-align:center;color:#9B2335;padding:32px">Error: ${e.message}</td></tr>`;
+    }
+  }
+
+  async function addPenalty(id) {
+    const p = prompt('Penalty points to add:');
+    if (p) { await apiFetch(`/staff/${id}/penalty`, { method: 'PUT', body: JSON.stringify({ points: parseInt(p) }) }); loadStaff(); }
+  }
+
+  async function loadPromotions() {
+    try {
+      const promos = await apiFetch('/promotional');
+      document.getElementById('promoBody').innerHTML = promos.map(p => `
+        <tr>
+          <td class="cell-muted">#${p.promotional_id}</td>
+          <td>${p.statement || ''}</td>
+          <td><span class="badge badge-confirmed">${p.discounts}%</span></td>
+          <td class="cell-muted">${p.start_date}</td>
+          <td class="cell-muted">${p.end_date}</td>
+          <td><button class="action-btn" onclick="alert('Edit promo ${p.promotional_id}')"><i class="fas fa-edit"></i></button></td>
+        </tr>`).join('');
+    } catch (e) {
+      document.getElementById('promoBody').innerHTML = `<tr><td colspan="6" style="text-align:center;color:#9B2335;padding:32px">Error: ${e.message}</td></tr>`;
+    }
+  }
+
+  async function loadOccupancyReport() {
+    try {
+      const data = await apiFetch('/reports/occupancy');
+      document.getElementById('occupancyBody').innerHTML = !data.length
+        ? '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:20px">No data</td></tr>'
+        : data.map(r => `<tr><td>${r.type}</td><td><span class="badge badge-neutral">${r.conditions}</span></td><td>${r.count}</td></tr>`).join('');
+    } catch (e) {
+      document.getElementById('occupancyBody').innerHTML = `<tr><td colspan="3" style="color:#9B2335;padding:20px">Error: ${e.message}</td></tr>`;
+    }
+  }
+
+  async function loadRevenueReport() {
+    try {
+      const data = await apiFetch('/reports/revenue');
+      document.getElementById('totalRevenue').textContent = `$${data.total_revenue || 0}`;
+      document.getElementById('totalReceipts').textContent = data.total_receipts || 0;
+      document.getElementById('avgBill').textContent = `$${parseFloat(data.avg_bill || 0).toFixed(2)}`;
+      document.getElementById('maxBill').textContent = `$${data.max_bill || 0}`;
+    } catch (e) { console.error(e); }
+  }
+
+  async function loadDescriptiveStats() {
+    try {
+      const data = await apiFetch('/reports/stats');
+      document.getElementById('avgStay').textContent = parseFloat(data.avg_stay_nights || 0).toFixed(1);
+      document.getElementById('totalReservations').textContent = data.total_reservations || 0;
+      document.getElementById('completedRes').textContent = data.completed || 0;
+      document.getElementById('cancelledRes').textContent = `Cancelled: ${data.cancelled || 0}`;
+      if (data.total_rooms) document.getElementById('statRooms').textContent = data.total_rooms;
+      if (data.total_staff) document.getElementById('statStaff').textContent = data.total_staff;
+      if (data.total_reservations) document.getElementById('statReservations').textContent = data.total_reservations;
+    } catch (e) { console.error(e); }
+  }
+
+  async function blacklistCustomer() {
+    const cid = document.getElementById('blacklistCustomerId').value;
+    if (!cid) return alert('Enter customer ID');
+    try { await apiFetch(`/customer/${cid}/blacklist`, { method: 'PUT' }); alert('Customer blacklisted.'); } catch (e) { alert(e.message); }
+  }
+
+  async function performCheckin() {
+    const rid = document.getElementById('checkReservationId').value;
+    if (!rid) return alert('Reservation ID required');
+    try {
+      await apiFetch(`/checkin/${rid}`, { method: 'POST' });
+      document.getElementById('checkoutResult').innerHTML = `<span style="color:#2B5E38">✓ Checked in reservation #${rid}</span>`;
+    } catch (e) { alert(e.message); }
+  }
+
+  async function performCheckout() {
+    const rid = document.getElementById('checkReservationId').value;
+    if (!rid) return alert('Reservation ID required');
+    try {
+      const res = await apiFetch(`/checkout/${rid}`, { method: 'PUT' });
+      document.getElementById('checkoutResult').innerHTML = `<span style="color:#2B5E38">✓ Checked out. Total bill: $${res.total_bill || 'N/A'}</span>`;
+    } catch (e) { alert(e.message); }
+  }
+
+  function checkAuth() {
+    if (!token || !staffData.staff_id) { window.location.href = 'staff-login.html'; return false; }
+    if (staffData.role !== 'manager') {
+      document.body.innerHTML = '<div style="padding:40px;color:#9B2335;font-family:IBM Plex Sans,sans-serif">Access denied: Manager only.</div>';
+      return false;
+    }
+    const first = staffData.first_name || 'Manager';
+    document.getElementById('staffName').textContent = `${first} ${staffData.last_name || ''}`.trim();
+    document.getElementById('avatarInitials').textContent = first[0].toUpperCase();
+    return true;
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    localStorage.removeItem('staff_token');
+    localStorage.removeItem('staff');
+    window.location.href = 'staff-login.html';
+  });
+
+  if (checkAuth()) {
+    loadReservations();
+    loadDescriptiveStats();
+  }
+</script>
+</body>
+</html>
