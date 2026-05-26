@@ -110,8 +110,8 @@
         <select id="role">
           <option value="">Select role</option>
           <option value="manager">Manager</option>
-          <option value="receptionist">Receptionist</option>
-          <option value="housekeeper">Housekeeper</option>
+          <option value="cashier">Receptionist</option>
+          <option value="house_keeping">Housekeeper</option>
         </select>
       </div>
       <div class="field">
@@ -131,6 +131,7 @@
       const password = document.getElementById('password').value;
       const err = document.getElementById('error');
       err.style.display = 'none';
+      
       if (!staff_id || !role || !password) {
         err.textContent = 'Fill in all fields.';
         err.style.display = 'block';
@@ -148,9 +149,22 @@
           err.style.display = 'block';
           return;
         }
+        
+        // Save authenticated metrics
         localStorage.setItem('staff', JSON.stringify(data.staff));
         localStorage.setItem('staff_token', data.token);
-        window.location.href = 'dashboard.html';
+        
+        // Dynamic split-routing engine
+        if (data.staff.role === 'manager') {
+          window.location.href = 'dashboard.html';
+        } else if (data.staff.role === 'receptionist' || data.staff.role === 'cashier') {
+          window.location.href = 'reception.html';
+        } else if (data.staff.role === 'house_keeping') {
+          window.location.href = 'housekeeping.html';
+        } else {
+          err.textContent = `Role system path not configured for: ${data.staff.role}`;
+          err.style.display = 'block';
+        }
       } catch (e) {
         err.textContent = 'Server error.';
         err.style.display = 'block';

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Receptionist Dashboard | Hotel AMS-B</title>
+  <link href="img/favicon.ico" rel="icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #1D9E75; --primary-dark: #0F6E56; --primary-light: #E1F5EE;
+      --bg: #F7F8F6; --surface: #FFFFFF; --surface-2: #F1F3F0;
+      --text: #1A1D1A; --text-muted: #6B7068; --border: #E2E6E0; --sidebar-w: 220px;
+    }
+    body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+    .shell { display: flex; height: 100vh; overflow: hidden; }
+    .sidebar { width: var(--sidebar-w); min-width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+    .sidebar-brand { padding: 20px 18px 16px; border-bottom: 1px solid var(--border); }
+    .sidebar-brand .hotel-name { font-size: 15px; font-weight: 600; color: var(--primary-dark); letter-spacing: -0.3px; }
+    .sidebar-brand .hotel-sub { font-size: 11px; color: var(--text-muted); font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
+    .nav-section { padding: 12px 10px 4px; }
+    .nav-section-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; padding: 0 8px; margin-bottom: 4px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; font-size: 13.5px; font-weight: 400; cursor: pointer; color: var(--text-muted); border: none; background: none; width: 100%; text-align: left; transition: background 0.12s, color 0.12s; margin-bottom: 1px; }
+    .nav-item i { font-size: 14px; width: 16px; text-align: center; }
+    .nav-item:hover { background: var(--surface-2); color: var(--text); }
+    .nav-item.active { background: var(--primary-light); color: var(--primary-dark); font-weight: 500; }
+    .sidebar-footer { margin-top: auto; padding: 12px 10px; border-top: 1px solid var(--border); }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 54px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .page-title { font-size: 15px; font-weight: 600; color: var(--text); }
+    .staff-pill { display: flex; align-items: center; gap: 8px; padding: 5px 10px 5px 5px; border-radius: 20px; background: var(--surface-2); font-size: 13px; }
+    .avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--primary-dark); }
+    .btn-logout { font-size: 12px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .btn-logout:hover { background: var(--surface-2); color: var(--text); }
+    .content { flex: 1; overflow-y: auto; padding: 24px; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .section-title { font-size: 15px; font-weight: 600; }
+    .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px; cursor: pointer; background: var(--surface); color: var(--text); display: inline-flex; align-items: center; gap: 6px; }
+    .btn:hover { background: var(--surface-2); }
+    .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+    .btn-success { color: #2B5E38; border-color: #A3D9B1; }
+    .btn-success:hover { background: #EDF7F0; }
+    .btn-danger { color: #9B2335; border-color: #F5C2C7; }
+    .btn-danger:hover { background: #FFF0F2; }
+    .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; background: var(--surface-2); font-family: 'IBM Plex Mono', monospace; }
+    tbody td { padding: 11px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+    .cell-muted { color: var(--text-muted); font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+    .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+    .badge-pending { background: #FEF3CD; color: #7D5A00; }
+    .badge-confirmed { background: var(--primary-light); color: var(--primary-dark); }
+    .badge-cancelled { background: #FDE8E8; color: #9B2335; }
+    .action-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px 6px; border-radius: 6px; }
+    .action-btn.success:hover { background: #EDF7F0; color: #2B5E38; }
+    .action-btn.danger:hover { background: #FFF0F2; color: #9B2335; }
+    .filter-select { font-size: 12px; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+    .ci-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-input { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); font-size: 13px; margin-bottom: 10px; color: var(--text); }
+    .form-input:focus { outline: none; border-color: var(--primary); }
+    .result-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; min-height: 90px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="hotel-name">🏨 Hotel AMS-B</div>
+      <div class="hotel-sub">Reception Console</div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Operations</div>
+      <button class="nav-item active" onclick="switchTab('reservations', this)">
+        <i class="fas fa-calendar-check"></i> Reservations
+      </button>
+      <button class="nav-item" onclick="switchTab('checkinout', this)">
+        <i class="fas fa-exchange-alt"></i> Check-in / out
+      </button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Management</div>
+      <button class="nav-item" onclick="switchTab('promotions', this)">
+        <i class="fas fa-tags"></i> Promotions
+      </button>
+      <button class="nav-item" onclick="switchTab('customers', this)">
+        <i class="fas fa-user-slash"></i> Blacklist
+      </button>
+      <button class="nav-item" onclick="switchTab('reviews', this)">
+        <i class="fas fa-comment-alt"></i> Log Review
+      </button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Account</div>
+      <button class="nav-item" onclick="switchTab('mystats', this)">
+        <i class="fas fa-user-circle"></i> My Stats
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="btn-logout w-100" id="logoutBtn">
+        <i class="fas fa-sign-out-alt"></i> Sign out
+      </button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left"><span class="page-title" id="pageTitle">Reservations</span></div>
+      <div class="topbar-right">
+        <div class="staff-pill">
+          <div class="avatar" id="avatarInitials">R</div>
+          <span id="staffName">Receptionist</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="tab-pane active" id="tab-reservations">
+        <div class="section-header">
+          <span class="section-title">All Reservations</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select id="resFilterStatus" class="filter-select">
+              <option value="">All status</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="completed">Completed</option>
+            </select>
+            <button class="btn btn-sm" onclick="loadReservations()"><i class="fas fa-sync-alt"></i> Refresh</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Customer</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="reservationsBody">
+              <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-checkinout">
+        <div class="section-header"><span class="section-title">Check-in / Check-out</span></div>
+        <div class="ci-grid">
+          <div>
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">Enter a reservation ID to process check-in or out.</p>
+            <input type="number" id="checkReservationId" class="form-input" placeholder="Reservation ID">
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-success" onclick="performCheckin()"><i class="fas fa-sign-in-alt"></i> Check-in</button>
+              <button class="btn" onclick="performCheckout()"><i class="fas fa-sign-out-alt"></i> Check-out & Bill</button>
+            </div>
+          </div>
+          <div>
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">Result</p>
+            <div class="result-box" id="checkoutResult">No action yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-promotions">
+        <div class="section-header">
+          <span class="section-title">Promotions</span>
+          <button class="btn btn-primary btn-sm" onclick="createNewPromo()"><i class="fas fa-plus"></i> Create Promotion</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Statement</th><th>Discount</th><th>Start Date</th><th>End Date</th></tr></thead>
+            <tbody id="promoBody">
+              <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:32px">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-customers">
+        <div class="section-header"><span class="section-title">Blacklist Customer</span></div>
+        <div style="max-width: 380px;">
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">Flag a customer profile down immediately.</p>
+          <div style="display:flex;gap:8px">
+            <input type="number" id="blacklistCustomerId" class="form-input" style="margin-bottom:0" placeholder="Customer ID">
+            <button class="btn btn-danger" onclick="blacklistCustomer()"><i class="fas fa-ban"></i> Blacklist</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-reviews">
+        <div class="section-header"><span class="section-title">Submit Manual Guest Review</span></div>
+        <div style="max-width: 450px;">
+          <input type="number" id="reviewReservationId" class="form-input" placeholder="Reservation ID">
+          <select id="reviewRating" class="form-input">
+            <option value="5">⭐⭐⭐⭐⭐ 5 - Excellent</option>
+            <option value="4">⭐⭐⭐⭐ 4 - Good</option>
+            <option value="3">⭐⭐⭐ 3 - Fair</option>
+            <option value="2">⭐⭐ 2 - Poor</option>
+            <option value="1">⭐ 1 - Terrible</option>
+          </select>
+          <textarea id="reviewComment" class="form-input" rows="3" placeholder="Type direct desk guest notes here..."></textarea>
+          <button class="btn btn-primary" onclick="submitReview()"><i class="fas fa-paper-plane"></i> Save Feedback</button>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-mystats">
+        <div class="section-header"><span class="section-title">My Profile & Stats</span></div>
+        <div class="result-box" id="myStatsBox" style="max-width:500px; color:var(--text)">Loading profile data...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const API_BASE = '/api/staff';
+  let token = localStorage.getItem('staff_token');
+  let staffData = JSON.parse(localStorage.getItem('staff') || '{}');
+
+  const TAB_TITLES = { reservations: 'Reservations', checkinout: 'Check-in / Check-out', promotions: 'Promotions', customers: 'Blacklist', reviews: 'Log Feedback', mystats: 'My Profile' };
+
+  function switchTab(name, el) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    el.classList.add('active');
+    document.getElementById('pageTitle').textContent = TAB_TITLES[name] || name;
+    if (name === 'reservations') loadReservations();
+    else if (name === 'promotions') loadPromotions();
+    else if (name === 'mystats') loadMyStats();
+  }
+
+  async function apiFetch(endpoint, options = {}) {
+    const headers = { 'Content-Type': 'application/json', 'x-staff-token': token, ...(options.headers || {}) };
+    const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
+    return res.json();
+  }
+
+  async function loadReservations() {
+    const status = document.getElementById('resFilterStatus').value;
+    try {
+      const data = await apiFetch('/reservations' + (status ? `?status=${status}` : ''));
+      const tbody = document.getElementById('reservationsBody');
+      if (!data.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px">No assignments</td></tr>'; return; }
+      tbody.innerHTML = data.map(r => `
+        <tr>
+          <td class="cell-muted">#${r.reservation_id}</td>
+          <td>${r.customer_name || r.name || 'N/A'}</td>
+          <td>${r.room_number || r.number} <span style="color:var(--text-muted)">(${r.type})</span></td>
+          <td class="cell-muted">${r.check_in_date}</td>
+          <td class="cell-muted">${r.check_out_date}</td>
+          <td><span class="badge badge-${r.status}">${r.status}</span></td>
+          <td>
+            ${r.status === 'pending' ? `<button class="action-btn success" onclick="confirmRes(${r.reservation_id})"><i class="fas fa-check-circle"></i></button>` : ''}
+            ${(r.status === 'pending' || r.status === 'confirmed') ? `<button class="action-btn danger" onclick="cancelRes(${r.reservation_id})"><i class="fas fa-times-circle"></i></button>` : ''}
+          </td>
+        </tr>`).join('');
+    } catch (e) { document.getElementById('reservationsBody').innerHTML = `<tr><td colspan="7" style="color:#9B2335;padding:32px">Error: ${e.message}</td></tr>`; }
+  }
+
+  async function confirmRes(id) { try { await apiFetch(`/reservation/${id}/confirm`, { method: 'PUT' }); loadReservations(); } catch(e) { alert(e.message); } }
+  async function cancelRes(id) { try { await apiFetch(`/reservation/${id}/cancel`, { method: 'PUT' }); loadReservations(); } catch(e) { alert(e.message); } }
+
+  async function performCheckin() {
+    const rid = document.getElementById('checkReservationId').value;
+    if (!rid) return alert('Reservation ID required');
+    try {
+      await apiFetch(`/checkin/${rid}`, { method: 'POST' });
+      document.getElementById('checkoutResult').innerHTML = `<span style="color:#2B5E38">✓ Checked in reservation #${rid}</span>`;
+    } catch (e) { alert(e.message); }
+  }
+
+  async function performCheckout() {
+    const rid = document.getElementById('checkReservationId').value;
+    if (!rid) return alert('Reservation ID required');
+    try {
+      const res = await apiFetch(`/checkout/${rid}`, { method: 'PUT' });
+      document.getElementById('checkoutResult').innerHTML = `<span style="color:#2B5E38">✓ Checked out. Total bill: $${res.total_bill || 'N/A'}</span>`;
+    } catch (e) { alert(e.message); }
+  }
+
+  async function loadPromotions() {
+    try {
+      const promos = await apiFetch('/promotional');
+      document.getElementById('promoBody').innerHTML = promos.map(p => `<tr><td class="cell-muted">#${p.promotional_id}</td><td>${p.statement||''}</td><td><span class="badge badge-confirmed">${p.discounts}%</span></td><td class="cell-muted">${p.start_date}</td><td class="cell-muted">${p.end_date}</td></tr>`).join('');
+    } catch (e) { document.getElementById('promoBody').innerHTML = `<tr><td colspan="5">Error loading promos.</td></tr>`; }
+  }
+
+  async function createNewPromo() {
+    const statement = prompt('Promo Statement / Description:');
+    const discounts = prompt('Discount rate (percentage number only):');
+    if (statement && discounts) {
+      try {
+        await apiFetch('/promotional', { method: 'POST', body: JSON.stringify({ statement, discounts: parseInt(discounts) }) });
+        loadPromotions();
+      } catch(e) { alert(e.message); }
+    }
+  }
+
+  async function submitReview() {
+    const reservation_id = document.getElementById('reviewReservationId').value;
+    const rating = document.getElementById('reviewRating').value;
+    const feedback = document.getElementById('reviewComment').value;
+    if (!reservation_id) return alert('Reservation ID required');
+    try {
+      await apiFetch('/reviews', { method: 'POST', body: JSON.stringify({ reservation_id, rating: parseInt(rating), feedback }) });
+      alert('Review successfully saved!');
+      document.getElementById('reviewReservationId').value = '';
+      document.getElementById('reviewComment').value = '';
+    } catch (e) { alert(e.message); }
+  }
+
+  async function blacklistCustomer() {
+    const cid = document.getElementById('blacklistCustomerId').value;
+    if (!cid) return alert('Enter customer ID');
+    try { await apiFetch(`/customer/${cid}/blacklist`, { method: 'PUT' }); alert('Customer blacklisted.'); document.getElementById('blacklistCustomerId').value = ''; } catch(e) { alert(e.message); }
+  }
+
+  async function loadMyStats() {
+    try {
+      const data = await apiFetch('/staff');
+      const me = data.find(s => s.staff_id == staffData.staff_id) || staffData;
+      document.getElementById('myStatsBox').innerHTML = `
+        <div style="margin-bottom:6px"><strong>Name:</strong> ${me.first_name || ''} ${me.last_name || ''}</div>
+        <div style="margin-bottom:6px"><strong>Role Assigned:</strong> <span class="badge badge-cashier">${me.role.toUpperCase()}</span></div>
+        <div style="margin-bottom:6px"><strong>Contact Details:</strong> ${me.contact_number || 'N/A'}</div>
+        <div><strong>My Active Penalty Points:</strong> <span class="text-danger font-monospace fw-bold">${me.penalty_point || 0} PTS</span></div>
+      `;
+    } catch (e) { document.getElementById('myStatsBox').textContent = 'Profile verification completed.'; }
+  }
+
+  function checkAuth() {
+    if (!token || !staffData.staff_id) { window.location.href = 'index.html'; return false; }
+    if (staffData.role !== 'cashier') {
+      document.body.innerHTML = '<div style="padding:40px;color:#9B2335;font-family:IBM Plex Sans,sans-serif">Access denied: Receptionist permissions missing.</div>';
+      return false;
+    }
+    const first = staffData.first_name || 'Receptionist';
+    document.getElementById('staffName').textContent = `${first} ${staffData.last_name || ''}`.trim();
+    document.getElementById('avatarInitials').textContent = first[0].toUpperCase();
+    return true;
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    localStorage.removeItem('staff_token'); localStorage.removeItem('staff'); window.location.href = 'index.html';
+  });
+
+  if (checkAuth()) { loadReservations(); }
+</script>
+</body>
+</html>

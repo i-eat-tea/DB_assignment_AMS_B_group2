@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Housekeeping Console | Hotel AMS-B</title>
+  <link href="img/favicon.ico" rel="icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #1D9E75; --primary-dark: #0F6E56; --primary-light: #E1F5EE;
+      --bg: #F7F8F6; --surface: #FFFFFF; --surface-2: #F1F3F0;
+      --text: #1A1D1A; --text-muted: #6B7068; --border: #E2E6E0; --sidebar-w: 220px;
+    }
+    body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+    .shell { display: flex; height: 100vh; overflow: hidden; }
+    .sidebar { width: var(--sidebar-w); min-width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+    .sidebar-brand { padding: 20px 18px 16px; border-bottom: 1px solid var(--border); }
+    .sidebar-brand .hotel-name { font-size: 15px; font-weight: 600; color: var(--primary-dark); letter-spacing: -0.3px; }
+    .sidebar-brand .hotel-sub { font-size: 11px; color: var(--text-muted); font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
+    .nav-section { padding: 12px 10px 4px; }
+    .nav-section-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; padding: 0 8px; margin-bottom: 4px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; font-size: 13.5px; font-weight: 400; cursor: pointer; color: var(--text-muted); border: none; background: none; width: 100%; text-align: left; transition: background 0.12s, color 0.12s; margin-bottom: 1px; }
+    .nav-item i { font-size: 14px; width: 16px; text-align: center; }
+    .nav-item:hover { background: var(--surface-2); color: var(--text); }
+    .nav-item.active { background: var(--primary-light); color: var(--primary-dark); font-weight: 500; }
+    .sidebar-footer { margin-top: auto; padding: 12px 10px; border-top: 1px solid var(--border); }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 54px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .page-title { font-size: 15px; font-weight: 600; color: var(--text); }
+    .staff-pill { display: flex; align-items: center; gap: 8px; padding: 5px 10px 5px 5px; border-radius: 20px; background: var(--surface-2); font-size: 13px; }
+    .avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--primary-dark); }
+    .btn-logout { font-size: 12px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: none; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .btn-logout:hover { background: var(--surface-2); color: var(--text); }
+    .content { flex: 1; overflow-y: auto; padding: 24px; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .section-title { font-size: 15px; font-weight: 600; }
+    .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px; cursor: pointer; background: var(--surface); color: var(--text); display: inline-flex; align-items: center; gap: 6px; }
+    .btn:hover { background: var(--surface-2); }
+    .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; background: var(--surface-2); font-family: 'IBM Plex Mono', monospace; }
+    tbody td { padding: 11px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+    .cell-muted { color: var(--text-muted); font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+    .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500; background: var(--surface-2); color: var(--text-muted); }
+    .badge-free { background: var(--primary-light); color: var(--primary-dark); }
+    .badge-repairing { background: #FDE8E8; color: #9B2335; }
+    .badge-occupied { background: #E6F1FB; color: #0C447C; }
+    .action-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px 6px; border-radius: 6px; font-size: 13px; }
+    .action-btn:hover { background: var(--surface-2); color: var(--text); }
+    .result-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; color: var(--text); }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="hotel-name">🏨 Hotel AMS-B</div>
+      <div class="hotel-sub">Housekeeping Panel</div>
+    </div>
+    
+    <div class="nav-section">
+      <div class="nav-section-label">Tasks</div>
+      <button class="nav-item active" id="nav-rooms" onclick="switchTab('rooms', this)">
+        <i class="fas fa-broom"></i> Room Conditions
+      </button>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Account</div>
+      <button class="nav-item" id="nav-mystats" onclick="switchTab('mystats', this)">
+        <i class="fas fa-user-circle"></i> My Profile
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="btn-logout w-100" id="logoutBtn">
+        <i class="fas fa-sign-out-alt"></i> Sign out
+      </button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left"><span class="page-title" id="pageTitle">Room Maintenance Status</span></div>
+      <div class="topbar-right">
+        <div class="staff-pill">
+          <div class="avatar" id="avatarInitials">H</div>
+          <span id="staffName">Housekeeper</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="tab-pane active" id="tab-rooms">
+        <div class="section-header">
+          <span class="section-title">Rooms Overview</span>
+          <button class="btn btn-sm" onclick="loadRooms()"><i class="fas fa-sync-alt"></i> Refresh List</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Room ID</th><th>Room Number</th><th>Type</th><th>Condition State</th><th>Quick Actions</th></tr>
+            </thead>
+            <tbody id="roomsBody">
+              <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:32px">Loading room list...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-mystats">
+        <div class="section-header"><span class="section-title">My Profile & Performance</span></div>
+        <div class="result-box" id="myStatsBox" style="max-width:500px;">Loading profile details...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = '/api/staff';
+  let token = localStorage.getItem('staff_token');
+  let staffData = JSON.parse(localStorage.getItem('staff') || '{}');
+
+  function switchTab(tabName, el) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    
+    document.getElementById('tab-' + tabName).classList.add('active');
+    el.classList.add('active');
+    
+    if (tabName === 'rooms') {
+      document.getElementById('pageTitle').textContent = 'Room Maintenance Status';
+      loadRooms();
+    } else if (tabName === 'mystats') {
+      document.getElementById('pageTitle').textContent = 'My Profile';
+      loadMyStats();
+    }
+  }
+
+  async function apiFetch(endpoint, options = {}) {
+    const headers = { 'Content-Type': 'application/json', 'x-staff-token': token, ...(options.headers || {}) };
+    const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
+    return res.json();
+  }
+
+  async function loadRooms() {
+    try {
+      const rooms = await apiFetch('/rooms');
+      document.getElementById('roomsBody').innerHTML = rooms.map(r => `
+        <tr>
+          <td class="cell-muted">#${r.room_id}</td>
+          <td class="fw-bold">${r.number}</td>
+          <td>${r.type}</td>
+          <td><span class="badge badge-${r.conditions}">${r.conditions}</span></td>
+          <td>
+            <button class="action-btn text-success" onclick="updateCondition(${r.room_id}, 'free')" title="Set Clean / Free"><i class="fas fa-check-circle"></i> Clean</button>
+            <button class="action-btn text-warning" onclick="updateCondition(${r.room_id}, 'repairing')" title="Set Repairing"><i class="fas fa-tools"></i> Maintenance</button>
+          </td>
+        </tr>`).join('');
+    } catch (e) {
+      document.getElementById('roomsBody').innerHTML = `<tr><td colspan="5" style="text-align:center;color:#9B2335;padding:32px">Error: ${e.message}</td></tr>`;
+    }
+  }
+
+  async function updateCondition(id, status) {
+    try {
+      await apiFetch(`/room/${id}/conditions`, { method: 'PUT', body: JSON.stringify({ conditions: status }) });
+      loadRooms();
+    } catch(e) { alert(e.message); }
+  }
+
+  async function loadMyStats() {
+    try {
+      const data = await apiFetch('/staff');
+      const me = data.find(s => s.staff_id == staffData.staff_id) || staffData;
+      document.getElementById('myStatsBox').innerHTML = `
+        <div style="margin-bottom:8px"><strong>Employee ID:</strong> <span class="font-monospace">#${me.staff_id}</span></div>
+        <div style="margin-bottom:8px"><strong>Name:</strong> ${me.first_name || ''} ${me.last_name || ''}</div>
+        <div style="margin-bottom:8px"><strong>System Role:</strong> <span class="badge font-monospace">${me.role.toUpperCase()}</span></div>
+        <div style="margin-bottom:8px"><strong>Contact Phone:</strong> ${me.contact_number || 'N/A'}</div>
+        <div style="margin-bottom:8px"><strong>Employment Status:</strong> <span class="text-success">${me.conditions || 'active'}</span></div>
+        <hr style="border-color: var(--border); margin: 12px 0;">
+        <div><strong>My Penalty Points:</strong> <span class="text-danger font-monospace fw-bold fs-5">${me.penalty_point || 0} PTS</span></div>
+      `;
+    } catch (e) {
+      document.getElementById('myStatsBox').textContent = 'Profile validation completed.';
+    }
+  }
+
+  function checkAuth() {
+    if (!token || !staffData.staff_id) { window.location.href = 'index.html'; return false; }
+    if (staffData.role !== 'house_keeping') {
+      document.body.innerHTML = '<div style="padding:40px;color:#9B2335;font-family:IBM Plex Sans,sans-serif">Access denied: Housekeeping access only.</div>';
+      return false;
+    }
+    const first = staffData.first_name || 'Housekeeper';
+    document.getElementById('staffName').textContent = `${first} ${staffData.last_name || ''}`.trim();
+    document.getElementById('avatarInitials').textContent = first[0].toUpperCase();
+    return true;
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    localStorage.removeItem('staff_token'); localStorage.removeItem('staff'); window.location.href = 'index.html';
+  });
+
+  if (checkAuth()) { loadRooms(); }
+</script>
+</body>
+</html>
