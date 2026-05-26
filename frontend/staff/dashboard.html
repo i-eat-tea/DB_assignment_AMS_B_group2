@@ -462,7 +462,7 @@
       <div class="tab-pane" id="tab-rooms">
         <div class="section-header">
           <span class="section-title">Room Management</span>
-          <button class="btn btn-primary btn-sm" onclick="alert('Add room – implement modal')">
+          <button class="btn btn-primary btn-sm" onclick="window.location.href='room-form.html'">
             <i class="fas fa-plus"></i> Add Room
           </button>
         </div>
@@ -482,7 +482,7 @@
       <div class="tab-pane" id="tab-staff">
         <div class="section-header">
           <span class="section-title">Staff Directory</span>
-          <button class="btn btn-primary btn-sm" onclick="alert('Add staff – implement modal')">
+          <button class="btn btn-primary btn-sm" onclick="window.location.href='staff-form.html'">
             <i class="fas fa-user-plus"></i> Add Staff
           </button>
         </div>
@@ -586,7 +586,7 @@
         <div class="section-header">
           <span class="section-title">Blacklist Customer</span>
         </div>
-        <div class="bl-form">
+        <div class="bl-form" style="margin-bottom:24px">
           <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">
             Enter a customer ID to flag their account and restrict future bookings.
           </p>
@@ -596,7 +596,24 @@
               <i class="fas fa-ban"></i> Blacklist
             </button>
           </div>
-          <p class="hint">Use the customer_id visible in the reservations table.</p>
+          <p class="hint">Use the customer_id visible in the table below.</p>
+        </div>
+
+        <div class="section-header">
+          <span class="section-title">Customer List</span>
+          <button class="btn btn-sm" onclick="loadCustomers()">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Name</th><th>Email</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="customersBody">
+              <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:32px">Loading...</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -658,6 +675,7 @@
     else if (name === 'staff') loadStaff();
     else if (name === 'promotions') loadPromotions();
     else if (name === 'reports') { loadOccupancyReport(); loadRevenueReport(); loadDescriptiveStats(); }
+    else if (name === 'customers') loadCustomers();
   }
 
   async function apiFetch(endpoint, options = {}) {
@@ -710,8 +728,8 @@
           <td>${r.capacity}</td>
           <td><span class="badge badge-neutral">${r.conditions}</span></td>
           <td>
-            <button class="action-btn" onclick="alert('Edit room ${r.room_id}')" title="Edit"><i class="fas fa-edit"></i></button>
-            <button class="action-btn warning" onclick="updateRoomCondition(${r.room_id})" title="Change condition"><i class="fas fa-wrench"></i></button>
+            <button class="action-btn" onclick="window.location.href='room-form.html?room_id=${r.room_id}'" title="Edit"><i class="fas fa-edit"></i></button>
+            <button class="action-btn warning" onclick="window.location.href='room-form.html?room_id=${r.room_id}'" title="Change condition"><i class="fas fa-wrench"></i></button>
           </td>
         </tr>`).join('');
     } catch (e) {
@@ -737,8 +755,7 @@
           <td>$${s.salary}</td>
           <td>${s.penalty_point || 0}</td>
           <td>
-            <button class="action-btn" onclick="alert('Edit staff ${s.staff_id}')" title="Edit"><i class="fas fa-edit"></i></button>
-            <button class="action-btn warning" onclick="addPenalty(${s.staff_id})" title="Add penalty"><i class="fas fa-exclamation-triangle"></i></button>
+            <button class="action-btn" onclick="window.location.href='staff-form.html?staff_id=${s.staff_id}'" title="Edit"><i class="fas fa-edit"></i></button>
           </td>
         </tr>`).join('');
     } catch (e) {
@@ -825,7 +842,43 @@
       document.getElementById('checkoutResult').innerHTML = `<span style="color:#2B5E38">✓ Checked out. Total bill: $${res.total_bill || 'N/A'}</span>`;
     } catch (e) { alert(e.message); }
   }
+  async function loadCustomers() {
+    try {
+      const data = await apiFetch('/customers');
+      const tbody = document.getElementById('customersBody');
+      if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:32px">No customers found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(c => `
+        <tr>
+          <td class="cell-muted">#${c.customer_id}</td>
+          <td>${c.name}</td>
+          <td class="cell-muted">${c.email}</td>
+          <td>
+            <span class="badge ${c.is_blacklisted ? 'badge-cancelled' : 'badge-confirmed'}">
+              ${c.is_blacklisted ? 'Blacklisted' : 'Active'}
+            </span>
+          </td>
+          <td>
+            ${!c.is_blacklisted
+              ? `<button class="action-btn danger" onclick="quickBlacklist(${c.customer_id})" title="Blacklist"><i class="fas fa-ban"></i></button>`
+              : `<button class="action-btn success" onclick="unblacklist(${c.customer_id})" title="Remove blacklist"><i class="fas fa-check-circle"></i></button>`
+            }
+          </td>
+        </tr>`).join('');
+    } catch (e) {
+      document.getElementById('customersBody').innerHTML = `<tr><td colspan="5" style="text-align:center;color:#9B2335;padding:32px">Error: ${e.message}</td></tr>`;
+    }
+  }
 
+  async function quickBlacklist(id) {
+    try { await apiFetch(`/customer/${id}/blacklist`, { method: 'PUT' }); loadCustomers(); } catch (e) { alert(e.message); }
+  }
+
+  async function unblacklist(id) {
+    try { await apiFetch(`/customer/${id}/unblacklist`, { method: 'PUT' }); loadCustomers(); } catch (e) { alert(e.message); }
+  }
   function checkAuth() {
     if (!token || !staffData.staff_id) { window.location.href = 'staff-login.html'; return false; }
     if (staffData.role !== 'manager') {
@@ -841,13 +894,14 @@
   document.getElementById('logoutBtn').addEventListener('click', () => {
     localStorage.removeItem('staff_token');
     localStorage.removeItem('staff');
-    window.location.href = 'staff-login.html';
+    window.location.href = 'index.html';
   });
 
   if (checkAuth()) {
     loadReservations();
     loadDescriptiveStats();
   }
+  
 </script>
 </body>
 </html>

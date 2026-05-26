@@ -20,6 +20,7 @@
     <link href="lib/animate/animate.min.css" rel="stylesheet">
     <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
     <link href="lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -27,71 +28,102 @@
     <!-- Template Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
   <style>
-    body {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .login-wrap {
-      width: 100%;
-      max-width: 420px;
-      padding: 20px;
-      animation: fadeIn 0.4s ease;
-    }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    .login-header {
-      margin-bottom: 28px;
-    }
-    .login-header .tag {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 11px;
-      color: var(--primary);
-      letter-spacing: 2px;
-      margin-bottom: 8px;
-    }
-    .login-header h1 {
-      font-size: 26px;
-      font-weight: 300;
-      color: var(--light);
-      line-height: 1.3;
-    }
-    .card {
-      padding: 32px;
-    }
-    .field {
-      margin-bottom: 18px;
-    }
-    .field label {
-      display: block;
-      margin-bottom: 6px;
-    }
-    .field input,
-    .field select {
-      width: 100%;
-      padding: 10px 14px;
-    }
-    .field select option {
-      background: var(--surface-2);
-    }
-    .btn-primary {
-      width: 100%;
-      padding: 12px;
-      margin-top: 4px;
-      border: none;
-      cursor: pointer;
-    }
-    .error-box {
-      background: rgba(248,81,73,0.08);
-      border: 1px solid rgba(248,81,73,0.3);
-      color: var(--danger);
-      padding: 10px 14px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-family: 'IBM Plex Mono', monospace;
-      margin-top: 14px;
-      display: none;
-    }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F7F8F6;
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+  .login-wrap {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    animation: fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .login-header { margin-bottom: 24px; }
+  .login-header .tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #1D9E75;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .login-header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1A1D1A;
+    line-height: 1.3;
+  }
+
+  .card {
+    background: #FFFFFF;
+    border: 1px solid #E2E6E0;
+    border-radius: 14px;
+    padding: 28px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: #6B7068;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 6px;
+  }
+  .field input,
+  .field select {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1px solid #E2E6E0;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    color: #1A1D1A;
+    background: #FFFFFF;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  .field input:focus,
+  .field select:focus { border-color: #1D9E75; }
+  .field select option { background: #fff; }
+
+  .btn-primary {
+    width: 100%;
+    padding: 11px;
+    margin-top: 6px;
+    border: none;
+    border-radius: 8px;
+    background: #1D9E75;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'IBM Plex Sans', sans-serif;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-primary:hover { background: #0F6E56; }
+
+  .error-box {
+    background: #FDE8E8;
+    border: 1px solid #F5C2C7;
+    color: #9B2335;
+    padding: 10px 13px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-top: 12px;
+    display: none;
+  }
   </style>
 </head>
 <body>

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff Form | Hotel AMS-B</title>
+  <link href="img/favicon.ico" rel="icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #1D9E75;
+      --primary-dark: #0F6E56;
+      --primary-light: #E1F5EE;
+      --bg: #F7F8F6;
+      --surface: #FFFFFF;
+      --surface-2: #F1F3F0;
+      --text: #1A1D1A;
+      --text-muted: #6B7068;
+      --border: #E2E6E0;
+    }
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      min-height: 100vh;
+    }
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 8px;
+      transition: background 0.12s;
+    }
+    .back-btn:hover { background: var(--surface-2); color: var(--text); }
+    .topbar-title { font-size: 15px; font-weight: 600; }
+    .divider-v { width: 1px; height: 18px; background: var(--border); }
+    .mode-badge {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .mode-add { background: var(--primary-light); color: var(--primary-dark); }
+    .mode-edit { background: #FEF3CD; color: #7D5A00; }
+
+    .content { max-width: 680px; margin: 32px auto; padding: 0 20px 60px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-family: 'IBM Plex Mono', monospace;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title i { color: var(--primary); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      font-family: 'IBM Plex Mono', monospace;
+      margin-bottom: 6px;
+    }
+    .field input,
+    .field select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field input:focus,
+    .field select:focus { border-color: var(--primary); }
+    .field input::placeholder { color: #B0B5AF; }
+    .field .hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .penalty-display {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .penalty-value {
+      font-size: 22px;
+      font-weight: 600;
+      color: #9B2335;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .penalty-label { font-size: 12px; color: var(--text-muted); }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.12s;
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--surface-2); }
+    .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+
+    .toast-wrap {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast {
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      animation: slideUp 0.25s ease;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    .toast.success { background: #EDF7F0; color: #2B5E38; border: 1px solid #A3D9B1; }
+    .toast.error { background: #FDE8E8; color: #9B2335; border: 1px solid #F5C2C7; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back
+      </a>
+      <div class="divider-v"></div>
+      <span class="topbar-title" id="pageTitle">Add Staff</span>
+      <span class="mode-badge mode-add" id="modeBadge">NEW</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Personal Info -->
+    <div class="card">
+      <div class="card-title"><i class="fas fa-user"></i> Personal Information</div>
+      <div class="grid-2">
+        <div class="field">
+          <label>First Name</label>
+          <input type="text" id="first_name" placeholder="e.g. John">
+        </div>
+        <div class="field">
+          <label>Last Name</label>
+          <input type="text" id="last_name" placeholder="e.g. Doe">
+        </div>
+      </div>
+      <div class="field" style="margin-top:14px">
+        <label>Contact Number</label>
+        <input type="text" id="contact_number" placeholder="e.g. +855 12 345 678">
+      </div>
+    </div>
+
+    <!-- Role & Status -->
+    <div class="card">
+      <div class="card-title"><i class="fas fa-id-badge"></i> Role & Status</div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Role</label>
+          <select id="role">
+            <option value="">Select role</option>
+            <option value="manager">Manager</option>
+            <option value="cashier">Cashier</option>
+            <option value="house_keeping">House Keeping</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Conditions</label>
+          <select id="conditions">
+            <option value="active">Active</option>
+            <option value="terminated">Terminated</option>
+            <option value="planned_leave">Planned Leave</option>
+            <option value="unplanned_leave">Unplanned Leave</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" style="margin-top:14px">
+        <label>Salary ($)</label>
+        <input type="number" id="salary" placeholder="e.g. 500" min="0" step="0.01">
+      </div>
+    </div>
+
+    <!-- Password (only for new staff) -->
+    <div class="card" id="passwordCard">
+      <div class="card-title"><i class="fas fa-lock"></i> Password</div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Set a password">
+        <p class="hint">Leave blank when editing to keep the existing password.</p>
+      </div>
+    </div>
+
+    <!-- Penalty (edit only) -->
+    <div class="card d-none" id="penaltyCard">
+      <div class="card-title"><i class="fas fa-exclamation-triangle"></i> Penalty Points</div>
+      <div class="penalty-display">
+        <div>
+          <div class="penalty-value" id="penaltyValue">0</div>
+          <div class="penalty-label">current penalty points</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <input type="number" id="penaltyAdd" placeholder="Add points" min="1"
+            style="width:120px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'IBM Plex Sans',sans-serif">
+          <button class="btn" style="padding:8px 14px" onclick="addPenaltyPoints()">
+            <i class="fas fa-plus"></i> Add
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <a href="dashboard.html" class="btn">Cancel</a>
+      <button class="btn btn-primary" onclick="saveStaff()">
+        <i class="fas fa-save"></i> <span id="saveBtnText">Save Staff</span>
+      </button>
+    </div>
+
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <script>
+    const API = '/api/staff';
+    let token = localStorage.getItem('staff_token');
+    let staffId = null;
+
+    const authStaff = JSON.parse(localStorage.getItem('staff') || '{}');
+    if (!token || !authStaff.staff_id) window.location.href = 'staff-login.html';
+
+    const params = new URLSearchParams(window.location.search);
+    staffId = params.get('staff_id') ? parseInt(params.get('staff_id')) : null;
+
+    if (staffId) {
+      document.getElementById('pageTitle').textContent = 'Edit Staff';
+      document.getElementById('modeBadge').textContent = 'EDIT';
+      document.getElementById('modeBadge').className = 'mode-badge mode-edit';
+      document.getElementById('saveBtnText').textContent = 'Save Changes';
+      document.getElementById('penaltyCard').classList.remove('d-none');
+      loadStaff(staffId);
+    }
+
+    async function loadStaff(id) {
+      try {
+        const res = await fetch(`${API}/staff/${id}`, {
+          headers: { 'x-staff-token': token }
+        });
+        const s = await res.json();
+        if (s.error) { showToast(s.error, 'error'); return; }
+
+        document.getElementById('first_name').value = s.first_name || '';
+        document.getElementById('last_name').value = s.last_name || '';
+        document.getElementById('contact_number').value = s.contact_number || '';
+        document.getElementById('role').value = s.role || '';
+        document.getElementById('conditions').value = s.conditions || 'active';
+        document.getElementById('salary').value = s.salary || '';
+        document.getElementById('penaltyValue').textContent = s.penalty_point || 0;
+      } catch (e) {
+        showToast('Failed to load staff.', 'error');
+      }
+    }
+
+    async function addPenaltyPoints() {
+      const points = parseInt(document.getElementById('penaltyAdd').value);
+      if (!points || points < 1) { showToast('Enter valid penalty points.', 'error'); return; }
+      try {
+        const res = await fetch(`${API}/staff/${staffId}/penalty`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'x-staff-token': token },
+          body: JSON.stringify({ points })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Penalty added.');
+          document.getElementById('penaltyAdd').value = '';
+          loadStaff(staffId);
+        } else {
+          showToast(data.error || 'Failed.', 'error');
+        }
+      } catch (e) {
+        showToast('Server error.', 'error');
+      }
+    }
+
+    async function saveStaff() {
+      const first_name = document.getElementById('first_name').value.trim();
+      const last_name = document.getElementById('last_name').value.trim();
+      const contact_number = document.getElementById('contact_number').value.trim();
+      const role = document.getElementById('role').value;
+      const conditions = document.getElementById('conditions').value;
+      const salary = document.getElementById('salary').value;
+      const password = document.getElementById('password').value;
+
+      if (!first_name || !last_name || !role || !salary) {
+        showToast('Please fill in all required fields.', 'error');
+        return;
+      }
+      if (!staffId && !password) {
+        showToast('Password is required for new staff.', 'error');
+        return;
+      }
+
+      const body = { first_name, last_name, contact_number, role, conditions, salary: parseFloat(salary) };
+      if (password) body.password = password;
+
+      try {
+        let res;
+        if (staffId) {
+          res = await fetch(`${API}/staff/${staffId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'x-staff-token': token },
+            body: JSON.stringify(body)
+          });
+        } else {
+          res = await fetch(`${API}/staff`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-staff-token': token },
+            body: JSON.stringify({ ...body, hotel_id: authStaff.hotel_id || 1 })
+          });
+        }
+
+        const data = await res.json();
+        if (data.success) {
+          showToast(staffId ? 'Staff updated!' : 'Staff added!', 'success');
+          setTimeout(() => window.location.href = 'dashboard.html', 1200);
+        } else {
+          showToast(data.error || 'Save failed.', 'error');
+        }
+      } catch (e) {
+        showToast('Server error.', 'error');
+      }
+    }
+
+    function showToast(msg, type = 'success') {
+      const wrap = document.getElementById('toastWrap');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      wrap.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }
+  </script>
+</body>
+</html>
