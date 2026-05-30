@@ -305,5 +305,24 @@ router.delete('/reservation/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// get all reviews
+router.get('/reviews', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT r.review_id, c.name AS customer_name,
+              ro.number AS room_number, ro.type AS room_type,
+              r.stars, r.statement,
+              DATE_FORMAT(r.time, '%d %b %Y') AS review_date
+       FROM review r
+       JOIN customer c ON r.customer_id = c.customer_id
+       JOIN room ro ON r.room_id = ro.room_id
+       WHERE r.is_valid = 1
+       ORDER BY r.time DESC`
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 module.exports = router;

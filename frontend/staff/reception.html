@@ -415,25 +415,48 @@
         </div>
       </div>
 
+      <!-- Balanced Layout with Dynamic System Promotions Module -->
       <div class="tab-pane" id="tab-checkinout">
-        <div class="section-header"><span class="section-title">Check-in / Check-out</span></div>
+        <div class="section-header"><span class="section-title">Check-in / Check-out Operations</span></div>
         <div class="ci-grid">
           <div>
+            <label class="cell-muted d-block mb-1">RESERVATION TRACKING ID</label>
             <input type="number" id="checkReservationId" class="form-input" placeholder="Reservation ID">
-            <div style="display:flex;gap:8px">
+            <div style="display:flex;gap:8px; margin-bottom: 20px;">
               <button class="btn btn-success" onclick="performCheckin()"><i class="fas fa-sign-in-alt"></i> Check-in</button>
-              <button class="btn" onclick="performCheckout()"><i class="fas fa-sign-out-alt"></i> Check-out & Bill</button>
+              <button class="btn btn-primary" onclick="performCheckout()"><i class="fas fa-sign-out-alt"></i> Standard Checkout</button>
+            </div>
+            <div class="result-box" id="checkoutResult">No action yet.</div>
+          </div>
+          <div>
+            <div class="section-header mb-2">
+              <span class="section-title" style="font-size:13px; color: var(--text-muted); font-family: 'IBM Plex Mono', monospace;">
+                <i class="fas fa-tags text-success"></i> ACTIVE SYSTEM PROMOTIONS
+              </span>
+            </div>
+            <div class="table-wrap" style="max-height: 250px; overflow-y: auto;">
+              <table>
+                <thead>
+                  <tr><th>Offer Details</th><th>Deduction</th><th>Action</th></tr>
+                </thead>
+                <tbody id="promotionsBody">
+                  <tr><td colspan="3" style="text-align:center; padding:16px; color:var(--text-muted)">Loading active offers...</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
-          <div><div class="result-box" id="checkoutResult">No action yet.</div></div>
         </div>
       </div>
 
       <div class="tab-pane" id="tab-reviews">
         <div class="section-header"><span class="section-title">Submit Guest Feedback</span></div>
         <div style="max-width: 450px;">
-          <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">Log front desk reviews directly into system files.</p>
-          <input type="number" id="reviewReservationId" class="form-input" placeholder="Reservation ID">
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">Log front desk reviews directly into system files mapped via active reservations.</p>
+          
+          <select id="reviewStaySelector" class="form-input">
+            <option value="">-- Select Guest Stay Record --</option>
+          </select>
+
           <select id="reviewRating" class="form-input">
             <option value="5">⭐⭐⭐⭐⭐ 5 - Excellent</option>
             <option value="4">⭐⭐⭐⭐ 4 - Good</option>
@@ -480,6 +503,8 @@
     if (name === 'reservations') loadReservations();
     else if (name === 'rooms') loadRooms();
     else if (name === 'customers') loadCustomers();
+    else if (name === 'checkinout') loadPromotions(); 
+    else if (name === 'reviews') loadActiveStays();
     else if (name === 'mystats') loadMyStats();
   }
 
@@ -488,6 +513,61 @@
     const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
     return res.json();
+  }
+
+  async function loadPromotions() {
+    try {
+      const promos = await apiFetch('/promotional/active'); 
+      const tbody = document.getElementById('promotionsBody');
+      
+      if (!promos.length) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:16px; color:var(--text-muted)">No active promotions currently running.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = promos.map(p => `
+        <tr>
+          <td><strong>${p.statement}</strong><br><span style="font-size:11px; color: var(--text-muted)">Ends: ${p.end_date}</span></td>
+          <td class="fw-bold text-success">-${parseFloat(p.discounts)}%</td>
+          <td>
+            <button class="btn btn-sm btn-success" onclick="performCheckout(${p.promotional_id})">
+              Apply & Checkout
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    } catch (e) {
+      document.getElementById('promotionsBody').innerHTML = `<tr><td colspan="3" class="text-danger p-3">Error fetching promos: ${e.message}</td></tr>`;
+    }
+  }
+
+  async function performCheckin() {
+    const rid = document.getElementById('checkReservationId').value;
+    if (!rid) return alert('Reservation ID required');
+    try {
+      await apiFetch(`/checkin/${rid}`, { method: 'POST' });
+      document.getElementById('checkoutResult').innerHTML = `<span style="color:#2B5E38; font-weight:500;">✓ Checked in reservation #${rid} successfully.</span>`;
+    } catch (e) { document.getElementById('checkoutResult').innerHTML = `<span class="text-danger">${e.message}</span>`; }
+  }
+
+  async function performCheckout(promoId = null) {
+    const rid = document.getElementById('checkReservationId').value;
+    if (!rid) return alert('Please enter a valid Reservation ID first to complete checkout operations.');
+    
+    try {
+      const res = await apiFetch(`/checkout/${rid}`, { 
+        method: 'PUT',
+        body: JSON.stringify({ promotional_id: promoId })
+      });
+      
+      let promoAppliedText = promoId ? `<br><span class="badge badge-confirmed">Promotion discount tracking applied</span>` : '';
+      document.getElementById('checkoutResult').innerHTML = `
+        <span style="color:#2B5E38; font-weight: 600;">✓ Checkout Completed.</span><br>
+        <strong>Total Bill Due:</strong> $${res.total_bill || 'N/A'} ${promoAppliedText}
+      `;
+    } catch (e) { 
+      document.getElementById('checkoutResult').innerHTML = `<span class="text-danger">${e.message}</span>`; 
+    }
   }
 
   async function loadReservations() {
@@ -544,35 +624,44 @@
   }
   async function quickBlacklist(id) { try { await apiFetch(`/customer/${id}/blacklist`, { method: 'PUT' }); loadCustomers(); } catch (e) { alert(e.message); } }
   async function unblacklist(id) { try { await apiFetch(`/customer/${id}/unblacklist`, { method: 'PUT' }); loadCustomers(); } catch (e) { alert(e.message); } }
-
-  async function performCheckin() {
-    const rid = document.getElementById('checkReservationId').value;
-    if (!rid) return alert('Reservation ID required');
+  
+  async function loadActiveStays() {
+    const selector = document.getElementById('reviewStaySelector');
+    selector.innerHTML = '<option value="">-- Loading Stays... --</option>';
     try {
-      await apiFetch(`/checkin/${rid}`, { method: 'POST' });
-      document.getElementById('checkoutResult').innerHTML = `<span style="color:#2B5E38">✓ Checked in reservation #${rid}</span>`;
-    } catch (e) { document.getElementById('checkoutResult').innerHTML = `<span class="text-danger">${e.message}</span>`; }
-  }
-
-  async function performCheckout() {
-    const rid = document.getElementById('checkReservationId').value;
-    if (!rid) return alert('Reservation ID required');
-    try {
-      const res = await apiFetch(`/checkout/${rid}`, { method: 'PUT' });
-      document.getElementById('checkoutResult').innerHTML = `<span style="color:#2B5E38">✓ Checked out. Total bill: $${res.total_bill || 'N/A'}</span>`;
-    } catch (e) { document.getElementById('checkoutResult').innerHTML = `<span class="text-danger">${e.message}</span>`; }
+      const stays = await apiFetch('/active-stays');
+      selector.innerHTML = '<option value="">-- Select Guest Stay Record --</option>';
+      if (!stays.length) return;
+      
+      stays.forEach(stay => {
+        const opt = document.createElement('option');
+        opt.value = JSON.stringify({ room_id: stay.room_id, customer_id: stay.customer_id });
+        opt.textContent = `${stay.customer_name} (Room #${stay.room_number})`;
+        selector.appendChild(opt);
+      });
+    } catch (e) {
+      selector.innerHTML = '<option value="">-- Failed to load active stays matrix --</option>';
+    }
   }
 
   async function submitReview() {
-    const reservation_id = document.getElementById('reviewReservationId').value;
+    const stayDataRaw = document.getElementById('reviewStaySelector').value;
     const rating = document.getElementById('reviewRating').value;
-    const feedback = document.getElementById('reviewComment').value;
-    if (!reservation_id) return alert('Reservation ID required');
+    const feedback = document.getElementById('reviewComment').value.trim();
+    
+    if (!stayDataRaw) return alert('Please select an active guest stay record');
+    if (!feedback) return alert('Feedback details statement required');
+
+    const { room_id, customer_id } = JSON.parse(stayDataRaw);
+
     try {
-      await apiFetch('/reviews', { method: 'POST', body: JSON.stringify({ reservation_id, rating: parseInt(rating), feedback }) });
+      await apiFetch('/feedback', { 
+        method: 'POST', 
+        body: JSON.stringify({ room_id, customer_id, stars: parseInt(rating), statement: feedback }) 
+      });
       alert('Review successfully saved!');
-      document.getElementById('reviewReservationId').value = '';
       document.getElementById('reviewComment').value = '';
+      document.getElementById('reviewStaySelector').value = '';
     } catch (e) { alert(e.message); }
   }
 

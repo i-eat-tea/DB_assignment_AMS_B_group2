@@ -389,6 +389,19 @@ router.get('/promotional', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// Get only current active promotions for checkout
+router.get('/promotional/active', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT promotional_id, statement, discounts, start_date, end_date 
+       FROM promotional 
+       WHERE NOW() BETWEEN start_date AND end_date`
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 // Get all rooms (for staff)
 router.get('/rooms', async (req, res) => {
   try {
@@ -422,4 +435,44 @@ router.put('/customer/:id/unblacklist', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// Get active/completed stays mapped to customer names and room numbers for reviews
+router.get('/active-stays', async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        res.reservation_id,
+        res.customer_id,
+        res.room_id,
+        c.name AS customer_name,
+        r.number AS room_number
+      FROM reservation res
+      JOIN customer c ON res.customer_id = c.customer_id
+      JOIN room r ON res.room_id = r.room_id
+      ORDER BY res.reservation_id DESC
+    `);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+// Submit guest feedback using explicit relationship foreign keys
+router.post('/feedback', async (req, res) => {
+  const { room_id, customer_id, stars, statement } = req.body;
+
+  if (!room_id || !customer_id || !stars || !statement) {
+    return res.status(400).json({ error: 'Missing required feedback fields.' });
+  }
+
+  try {
+    await db.query(
+      `INSERT INTO review (room_id, customer_id, stars, time, statement, is_valid)
+       VALUES (?, ?, ?, NOW(), ?, 1)`,
+      [room_id, customer_id, stars, statement]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
