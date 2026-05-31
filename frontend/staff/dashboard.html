@@ -502,7 +502,7 @@
       <div class="tab-pane" id="tab-promotions">
         <div class="section-header">
           <span class="section-title">Promotions</span>
-          <button class="btn btn-primary btn-sm" onclick="alert('Create promotion – implement modal')">
+          <button class="btn btn-primary btn-sm" onclick="window.location.href='promotional-form.html'">
             <i class="fas fa-plus"></i> Create Promotion
           </button>
         </div>
@@ -778,7 +778,7 @@
           <td><span class="badge badge-confirmed">${p.discounts}%</span></td>
           <td class="cell-muted">${p.start_date}</td>
           <td class="cell-muted">${p.end_date}</td>
-          <td><button class="action-btn" onclick="alert('Edit promo ${p.promotional_id}')"><i class="fas fa-edit"></i></button></td>
+          <td><button class="action-btn" onclick="window.location.href='promotional-form.html?promo_id=${p.promotional_id}'"><i class="fas fa-edit"></i></button></td>
         </tr>`).join('');
     } catch (e) {
       document.getElementById('promoBody').innerHTML = `<tr><td colspan="6" style="text-align:center;color:#9B2335;padding:32px">Error: ${e.message}</td></tr>`;

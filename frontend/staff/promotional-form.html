@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promotion Form | Hotel AMS-B</title>
+  <link href="img/favicon.ico" rel="icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #1D9E75;
+      --primary-dark: #0F6E56;
+      --primary-light: #E1F5EE;
+      --bg: #F7F8F6;
+      --surface: #FFFFFF;
+      --surface-2: #F1F3F0;
+      --text: #1A1D1A;
+      --text-muted: #6B7068;
+      --border: #E2E6E0;
+    }
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      min-height: 100vh;
+    }
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 8px;
+      transition: background 0.12s;
+    }
+    .back-btn:hover { background: var(--surface-2); color: var(--text); }
+    .divider-v { width: 1px; height: 18px; background: var(--border); }
+    .topbar-title { font-size: 15px; font-weight: 600; }
+    .mode-badge {
+      font-size: 11px;
+      font-family: 'IBM Plex Mono', monospace;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .mode-add { background: var(--primary-light); color: var(--primary-dark); }
+    .mode-edit { background: #FEF3CD; color: #7D5A00; }
+
+    .content { max-width: 560px; margin: 32px auto; padding: 0 20px 60px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-family: 'IBM Plex Mono', monospace;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title i { color: var(--primary); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      font-family: 'IBM Plex Mono', monospace;
+      margin-bottom: 6px;
+    }
+    .field input, .field textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field input:focus, .field textarea:focus { border-color: var(--primary); }
+    .field input::placeholder, .field textarea::placeholder { color: #B0B5AF; }
+    .field textarea { resize: vertical; min-height: 80px; }
+    .field .hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Discount preview */
+    .discount-preview {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--primary-light);
+      border: 1px solid #A3D9B1;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+    .discount-preview .big { font-size: 28px; font-weight: 600; color: var(--primary-dark); }
+    .discount-preview .label { font-size: 12px; color: var(--primary-dark); }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.12s;
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--surface-2); }
+    .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+    .btn-danger { color: #9B2335; border-color: #F5C2C7; }
+    .btn-danger:hover { background: #FFF0F2; }
+
+    .toast-wrap {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast {
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      animation: slideUp 0.25s ease;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    .toast.success { background: #EDF7F0; color: #2B5E38; border: 1px solid #A3D9B1; }
+    .toast.error { background: #FDE8E8; color: #9B2335; border: 1px solid #F5C2C7; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <a href="dashboard.html" class="back-btn">
+      <i class="fas fa-arrow-left"></i> Back
+    </a>
+    <div class="divider-v"></div>
+    <span class="topbar-title" id="pageTitle">Add Promotion</span>
+    <span class="mode-badge mode-add" id="modeBadge">NEW</span>
+  </div>
+
+  <div class="content">
+
+    <!-- Details -->
+    <div class="card">
+      <div class="card-title"><i class="fas fa-tag"></i> Promotion Details</div>
+
+      <div class="field">
+        <label>Statement / Name</label>
+        <input type="text" id="statement" placeholder="e.g. Summer Sale">
+      </div>
+
+      <div class="field">
+        <label>Discount (%)</label>
+        <input type="number" id="discounts" placeholder="e.g. 10" min="0" max="100" step="0.01"
+          oninput="updatePreview()">
+        <div class="discount-preview" id="discountPreview" style="display:none">
+          <div class="big" id="previewPct">0%</div>
+          <div class="label">off the total bill</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dates -->
+    <div class="card">
+      <div class="card-title"><i class="fas fa-calendar-alt"></i> Valid Period</div>
+      <div class="grid-2">
+        <div class="field">
+          <label>Start Date</label>
+          <input type="date" id="start_date">
+        </div>
+        <div class="field">
+          <label>End Date</label>
+          <input type="date" id="end_date">
+        </div>
+      </div>
+      <p class="hint" style="margin-top:8px">Promotion will only be active between these dates.</p>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      ${''/* delete button added dynamically for edit mode */}
+      <a href="dashboard.html" class="btn">Cancel</a>
+      <button class="btn btn-primary" onclick="savePromo()">
+        <i class="fas fa-save"></i> <span id="saveBtnText">Save Promotion</span>
+      </button>
+    </div>
+    <div class="actions" id="deleteAction" style="justify-content:flex-start;display:none;margin-top:0">
+      <button class="btn btn-danger" onclick="deletePromo()">
+        <i class="fas fa-trash"></i> Delete Promotion
+      </button>
+    </div>
+
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <script>
+    const API = '/api/staff';
+    let token = localStorage.getItem('staff_token');
+    let promoId = null;
+
+    const staff = JSON.parse(localStorage.getItem('staff') || '{}');
+    if (!token || !staff.staff_id) window.location.href = 'staff-login.html';
+
+    const params = new URLSearchParams(window.location.search);
+    promoId = params.get('promo_id') ? parseInt(params.get('promo_id')) : null;
+
+    if (promoId) {
+      document.getElementById('pageTitle').textContent = 'Edit Promotion';
+      document.getElementById('modeBadge').textContent = 'EDIT';
+      document.getElementById('modeBadge').className = 'mode-badge mode-edit';
+      document.getElementById('saveBtnText').textContent = 'Save Changes';
+      document.getElementById('deleteAction').style.display = 'flex';
+      loadPromo(promoId);
+    }
+
+    // set default dates to today and +30 days
+    if (!promoId) {
+      const today = new Date().toISOString().split('T')[0];
+      const next30 = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
+      document.getElementById('start_date').value = today;
+      document.getElementById('end_date').value = next30;
+    }
+
+    function updatePreview() {
+      const val = parseFloat(document.getElementById('discounts').value);
+      const preview = document.getElementById('discountPreview');
+      const pct = document.getElementById('previewPct');
+      if (val > 0) {
+        preview.style.display = 'flex';
+        pct.textContent = val + '%';
+      } else {
+        preview.style.display = 'none';
+      }
+    }
+
+    async function loadPromo(id) {
+      try {
+        const res = await fetch(`${API}/promotional/${id}`, {
+          headers: { 'x-staff-token': token }
+        });
+        const p = await res.json();
+        if (p.error) { showToast(p.error, 'error'); return; }
+
+        document.getElementById('statement').value = p.statement || '';
+        document.getElementById('discounts').value = p.discounts || '';
+        document.getElementById('start_date').value = p.start_date?.split('T')[0] || '';
+        document.getElementById('end_date').value = p.end_date?.split('T')[0] || '';
+        updatePreview();
+      } catch (e) {
+        showToast('Failed to load promotion.', 'error');
+      }
+    }
+
+    async function savePromo() {
+      const statement  = document.getElementById('statement').value.trim();
+      const discounts  = document.getElementById('discounts').value;
+      const start_date = document.getElementById('start_date').value;
+      const end_date   = document.getElementById('end_date').value;
+
+      if (!statement || !discounts || !start_date || !end_date) {
+        showToast('Please fill in all fields.', 'error');
+        return;
+      }
+      if (parseFloat(discounts) <= 0 || parseFloat(discounts) > 100) {
+        showToast('Discount must be between 1 and 100.', 'error');
+        return;
+      }
+      if (new Date(end_date) <= new Date(start_date)) {
+        showToast('End date must be after start date.', 'error');
+        return;
+      }
+
+      const body = { statement, discounts: parseFloat(discounts), start_date, end_date };
+
+      try {
+        let res;
+        if (promoId) {
+          res = await fetch(`${API}/promotional/${promoId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'x-staff-token': token },
+            body: JSON.stringify(body)
+          });
+        } else {
+          res = await fetch(`${API}/promotional`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-staff-token': token },
+            body: JSON.stringify(body)
+          });
+        }
+
+        const data = await res.json();
+        if (data.success) {
+          showToast(promoId ? 'Promotion updated!' : 'Promotion created!', 'success');
+          setTimeout(() => window.location.href = 'dashboard.html', 1200);
+        } else {
+          showToast(data.error || 'Save failed.', 'error');
+        }
+      } catch (e) {
+        showToast('Server error.', 'error');
+      }
+    }
+
+    async function deletePromo() {
+      if (!confirm('Delete this promotion? This cannot be undone.')) return;
+      try {
+        const res = await fetch(`${API}/promotional/${promoId}`, {
+          method: 'DELETE',
+          headers: { 'x-staff-token': token }
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Promotion deleted.');
+          setTimeout(() => window.location.href = 'dashboard.html', 1200);
+        } else {
+          showToast(data.error || 'Delete failed.', 'error');
+        }
+      } catch (e) {
+        showToast('Server error.', 'error');
+      }
+    }
+
+    function showToast(msg, type = 'success') {
+      const wrap = document.getElementById('toastWrap');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      wrap.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }
+  </script>
+</body>
+</html>

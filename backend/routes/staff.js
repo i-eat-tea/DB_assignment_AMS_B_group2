@@ -64,47 +64,78 @@ router.put('/reservation/:id/cancel', async (req, res) => {
 router.post('/checkin/:reservation_id', async (req, res) => {
   const { promotional_id } = req.body;
   try {
-    const [res_rows] = await db.query(
+    const [rows] = await db.query(
       `SELECT * FROM reservation WHERE reservation_id = ?`, [req.params.reservation_id]
     );
-    const reservation = res_rows[0];
+
+    if (!rows.length) {
+      return res.status(404).json({ error: 'Reservation not found.' });
+    }
+
+    const reservation = rows[0];
+
     await db.query(`UPDATE room SET conditions = 'occupied' WHERE room_id = ?`, [reservation.room_id]);
     await db.query(`UPDATE reservation SET status = 'confirmed' WHERE reservation_id = ?`, [req.params.reservation_id]);
     await db.query(
-      `INSERT INTO receipt (customer_id, room_id, reservation_id, promotional_id, clock_in, is_paid)
-       VALUES (?, ?, ?, ?, NOW(), 0)`,
-      [reservation.customer_id, reservation.room_id, reservation.reservation_id, promotional_id || null]
+      `UPDATE receipt SET clock_in = NOW(), promotional_id = COALESCE(?, promotional_id)
+       WHERE reservation_id = ?`,
+      [promotional_id || null, req.params.reservation_id]
     );
-    res.json({ success: true });
+
+    return res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
 
 // Check out customer + generate bill
 router.put('/checkout/:reservation_id', async (req, res) => {
+  const { promotional_id } = req.body;
   try {
     const [rec] = await db.query(
-      `SELECT rec.*, r.price, p.discounts FROM receipt rec
+      `SELECT rec.*, r.price FROM receipt rec
        JOIN room r ON rec.room_id = r.room_id
-       LEFT JOIN promotional p ON rec.promotional_id = p.promotional_id
        WHERE rec.reservation_id = ?`, [req.params.reservation_id]
     );
+    
+    console.log('rec rows:', rec); // add this
+    console.log('reservation_id:', req.params.reservation_id); // add this
+
+    if (!rec.length) {
+      return res.status(404).json({ error: 'Receipt not found for this reservation.' });
+    }
+
     const receipt = rec[0];
+
     const [res_rows] = await db.query(
       `SELECT DATEDIFF(check_out_date, check_in_date) AS nights FROM reservation WHERE reservation_id = ?`,
       [req.params.reservation_id]
     );
     const nights = res_rows[0].nights;
     let total = receipt.price * nights;
-    if (receipt.discounts) total -= (total * receipt.discounts / 100);
+
+    // use promo from request body if provided, otherwise use the one in receipt
+    const promoId = promotional_id || receipt.promotional_id;
+    let discountApplied = 0;
+
+    if (promoId) {
+      const [[promo]] = await db.query(
+        `SELECT discounts FROM promotional WHERE promotional_id = ?`, [promoId]
+      );
+      if (promo) {
+        discountApplied = promo.discounts;
+        total -= (total * promo.discounts / 100);
+      }
+    }
+
     await db.query(
-      `UPDATE receipt SET clock_out = NOW(), total_bill = ?, is_paid = 1 WHERE reservation_id = ?`,
-      [total.toFixed(2), req.params.reservation_id]
+      `UPDATE receipt SET clock_out = NOW(), total_bill = ?, is_paid = 1, promotional_id = ? WHERE reservation_id = ?`,
+      [total.toFixed(2), promoId || null, req.params.reservation_id]
     );
     await db.query(`UPDATE room SET conditions = 'free' WHERE room_id = ?`, [receipt.room_id]);
     await db.query(`UPDATE reservation SET status = 'completed' WHERE reservation_id = ?`, [req.params.reservation_id]);
-    res.json({ success: true, total_bill: total.toFixed(2) });
+
+    res.json({ success: true, total_bill: total.toFixed(2), discount_applied: discountApplied });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -380,6 +411,19 @@ router.put('/promotional/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// Get only current active promotions for checkout
+router.get('/promotional/active', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT promotional_id, statement, discounts, start_date, end_date 
+       FROM promotional 
+       WHERE CURDATE() BETWEEN DATE(start_date) AND DATE(end_date)`
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 // Get all promotions
 router.get('/promotional', async (req, res) => {
   try {
@@ -389,15 +433,24 @@ router.get('/promotional', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// Get only current active promotions for checkout
-router.get('/promotional/active', async (req, res) => {
+// Get single promotion
+router.get('/promotional/:id', async (req, res) => {
   try {
-    const [rows] = await db.query(
-      `SELECT promotional_id, statement, discounts, start_date, end_date 
-       FROM promotional 
-       WHERE NOW() BETWEEN start_date AND end_date`
+    const [[promo]] = await db.query(
+      `SELECT * FROM promotional WHERE promotional_id = ?`, [req.params.id]
     );
-    res.json(rows);
+    if (!promo) return res.status(404).json({ error: 'Promotion not found' });
+    res.json(promo);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete promotion
+router.delete('/promotional/:id', async (req, res) => {
+  try {
+    await db.query(`DELETE FROM promotional WHERE promotional_id = ?`, [req.params.id]);
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

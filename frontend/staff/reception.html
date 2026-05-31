@@ -545,9 +545,12 @@
     const rid = document.getElementById('checkReservationId').value;
     if (!rid) return alert('Reservation ID required');
     try {
-      await apiFetch(`/checkin/${rid}`, { method: 'POST' });
-      document.getElementById('checkoutResult').innerHTML = `<span style="color:#2B5E38; font-weight:500;">✓ Checked in reservation #${rid} successfully.</span>`;
-    } catch (e) { document.getElementById('checkoutResult').innerHTML = `<span class="text-danger">${e.message}</span>`; }
+      const result = await apiFetch(`/checkin/${rid}`, { method: 'POST' });
+      document.getElementById('checkoutResult').innerHTML = `<span style="color:#2B5E38;">✓ Checked in #${rid}</span>`;
+    } catch (e) { 
+      console.error('Checkin error:', e); // add this
+      document.getElementById('checkoutResult').innerHTML = `<span class="text-danger">${e.message}</span>`; 
+    }
   }
 
   async function performCheckout(promoId = null) {
