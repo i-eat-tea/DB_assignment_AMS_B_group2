@@ -160,7 +160,7 @@ async function loadReceipt() {
     }
 
     try {
-        const res  = await fetch(`http://localhost:3000/api/customer/receipt/${reservation_id}`);
+        const res  = await fetch(`https://db-assignment-ams-b-group2.onrender.com/api/customer/receipt/${reservation_id}`);
         const d    = await res.json();
 
         const nights = Math.ceil(
@@ -279,7 +279,7 @@ function showQR(reservation_id) {
     `;
 }
 async function markPaid(reservation_id) {
-    const res  = await fetch(`http://localhost:3000/api/customer/receipt/confirm/${reservation_id}`, { method: 'PUT' });
+    const res  = await fetch(`https://db-assignment-ams-b-group2.onrender.com/api/customer/receipt/confirm/${reservation_id}`, { method: 'PUT' });
     const data = await res.json();
     if (data.success) {
         location.reload();
@@ -290,3 +290,4 @@ document.addEventListener('DOMContentLoaded', loadReceipt);
 </script>
 </body>
 </html>
+

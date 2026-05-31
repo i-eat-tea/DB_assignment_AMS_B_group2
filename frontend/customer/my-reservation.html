@@ -265,7 +265,7 @@ async function lookupReservation() {
 
     try {
         
-        const res = await fetch(`http://localhost:3000/api/customer/reservation/by-receipt/${id}`);
+        const res = await fetch(`https://db-assignment-ams-b-group2.onrender.com/api/customer/reservation/by-receipt/${id}`);
         const data = await res.json();
         console.log(data); // add this
         console.log('customer_id match:', data.customer_id, customer.customer_id);
@@ -393,7 +393,7 @@ async function editReservation() {
     }
 
     try {
-        const res = await fetch(`http://localhost:3000/api/customer/reservation/${currentReservation.reservation_id}`, {
+        const res = await fetch(`https://db-assignment-ams-b-group2.onrender.com/api/customer/reservation/${currentReservation.reservation_id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ check_in, check_out, customer_id: customer.customer_id })
@@ -418,7 +418,7 @@ async function cancelReservation() {
     const customer = JSON.parse(localStorage.getItem('customer'));
 
     try {
-        const res = await fetch(`http://localhost:3000/api/customer/reservation/${currentReservation.reservation_id}`, {
+        const res = await fetch(`https://db-assignment-ams-b-group2.onrender.com/api/customer/reservation/${currentReservation.reservation_id}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ customer_id: customer.customer_id })
@@ -446,3 +446,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+

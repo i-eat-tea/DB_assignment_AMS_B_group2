@@ -71,8 +71,8 @@ PORT=3000
 npm run dev
 ```
 Then open your browser:
-- 👤 Customer portal → `http://localhost:3000/customer`
-- 🔧 Staff dashboard → `http://localhost:3000/staff`
+- 👤 Customer portal → `https://db-assignment-ams-b-group2.onrender.com/customer`
+- 🔧 Staff dashboard → `https://db-assignment-ams-b-group2.onrender.com/staff`
 
 ### 4. Deploy to Render
 1. Push repo to GitHub
@@ -127,3 +127,5 @@ Then open your browser:
 | `GET` | `/api/staff/reports/stats` | Descriptive stats |
 
 ---
+
+

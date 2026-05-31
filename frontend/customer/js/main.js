@@ -140,3 +140,4 @@ function requireLogin(e) {
         window.location.href = 'booking.html';
     }
 }
+

@@ -176,7 +176,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <a class="btn btn-primary py-3 px-5 mt-2" href="http://localhost:3000/customer/room.html">Rooms</a>
+                            <a class="btn btn-primary py-3 px-5 mt-2" href="https://db-assignment-ams-b-group2.onrender.com/customer/room.html">Rooms</a>
                         </div>
                         <div class="col-lg-6">
                             <div class="row g-3">
@@ -392,7 +392,7 @@
             try {
                 // 1. Fetch data only once if the array is empty
                 if (allReviews.length === 0) {
-                    const res = await fetch('http://localhost:3000/api/customer/reviews');
+                    const res = await fetch('https://db-assignment-ams-b-group2.onrender.com/api/customer/reviews');
                     allReviews = await res.json();
                 }
 
@@ -483,7 +483,7 @@ document.addEventListener('DOMContentLoaded', fetchAndRenderReviews);
             if (!roomsEl || !staffEl || !clientsEl) return;
 
             try {
-                const res  = await fetch('http://localhost:3000/api/customer/stats');
+                const res  = await fetch('https://db-assignment-ams-b-group2.onrender.com/api/customer/stats');
                 const data = await res.json();
                 roomsEl.textContent   = data.rooms;
                 staffEl.textContent   = data.staff;
@@ -497,7 +497,7 @@ document.addEventListener('DOMContentLoaded', fetchAndRenderReviews);
             const checkInEl  = document.getElementById('check_in');
             const checkOutEl = document.getElementById('check_out');
 
-            let url = `http://localhost:3000/api/customer/rooms?hotel_id=${HOTEL_ID}`;
+            let url = `https://db-assignment-ams-b-group2.onrender.com/api/customer/rooms?hotel_id=${HOTEL_ID}`;
             if (checkInEl?.value)  url += `&check_in=${checkInEl.value}`;
             if (checkOutEl?.value) url += `&check_out=${checkOutEl.value}`;
 
@@ -523,3 +523,4 @@ document.addEventListener('DOMContentLoaded', fetchAndRenderReviews);
         </script>
 
     </html>
+

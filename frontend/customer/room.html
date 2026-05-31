@@ -289,7 +289,7 @@
         const check_in  = checkInEl ? checkInEl.value : '';
         const check_out = checkOutEl ? checkOutEl.value : '';
 
-        let url = `http://localhost:3000/api/customer/rooms?hotel_id=${HOTEL_ID}`;
+        let url = `https://db-assignment-ams-b-group2.onrender.com/api/customer/rooms?hotel_id=${HOTEL_ID}`;
         if (check_in)  url += `&check_in=${check_in}`;
         if (check_out) url += `&check_out=${check_out}`;
 
@@ -318,3 +318,4 @@
 </body>
 
 </html>
+

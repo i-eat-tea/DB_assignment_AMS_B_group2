@@ -134,11 +134,11 @@ async function fetchRoomPageData() {
 
     try {
         // 1. Fetch Room Specs
-        const roomRes = await fetch(`http://localhost:3000/api/customer/rooms/${roomId}`);
+        const roomRes = await fetch(`https://db-assignment-ams-b-group2.onrender.com/api/customer/rooms/${roomId}`);
         const r = await roomRes.json();
 
         // 2. Fetch All Reviews to Client-Side Filter by Room
-        const reviewRes = await fetch('http://localhost:3000/api/customer/reviews');
+        const reviewRes = await fetch('https://db-assignment-ams-b-group2.onrender.com/api/customer/reviews');
         const allReviews = await reviewRes.json();
         
         // Filter reviews matching your specific room context item
@@ -212,7 +212,7 @@ async function fetchRoomPageData() {
                     </span>
                 </div>
 
-                <a href="http://localhost:3000/customer/booking.html?room_id=${r.room_id}" class="btn btn-primary py-3 px-5 w-100">
+                <a href="https://db-assignment-ams-b-group2.onrender.com/customer/booking.html?room_id=${r.room_id}" class="btn btn-primary py-3 px-5 w-100">
                     <i class="fa fa-calendar-check me-2"></i>Book Now
                 </a>
             </div>
@@ -280,3 +280,4 @@ document.addEventListener('DOMContentLoaded', fetchRoomPageData);
 </script>
 </body>
 </html>
+
