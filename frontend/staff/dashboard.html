@@ -704,6 +704,7 @@
           <td class="cell-muted">${r.check_out_date}</td>
           <td><span class="badge badge-${r.status}">${r.status}</span></td>
           <td>
+            <button class="action-btn" onclick="window.location.href='reservation-form.html?res_id=${r.reservation_id}'" title="Edit"><i class="fas fa-edit"></i></button>
             ${r.status === 'pending' ? `<button class="action-btn success" onclick="confirmRes(${r.reservation_id})" title="Confirm"><i class="fas fa-check-circle"></i></button>` : ''}
             ${(r.status === 'pending' || r.status === 'confirmed') ? `<button class="action-btn danger" onclick="cancelRes(${r.reservation_id})" title="Cancel"><i class="fas fa-times-circle"></i></button>` : ''}
           </td>

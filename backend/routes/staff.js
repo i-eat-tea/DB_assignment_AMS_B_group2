@@ -60,6 +60,68 @@ router.put('/reservation/:id/cancel', async (req, res) => {
   }
 });
 
+// Get single reservation
+router.get('/reservation/:id', async (req, res) => {
+  try {
+    const [[reservation]] = await db.query(
+      `SELECT 
+        res.*, 
+        c.name AS customer_name, c.email,
+        r.number AS room_number, r.type AS room_type, r.price,
+        rec.is_paid, rec.total_bill
+       FROM reservation res
+       JOIN customer c ON res.customer_id = c.customer_id
+       JOIN room r ON res.room_id = r.room_id
+       LEFT JOIN receipt rec ON res.reservation_id = rec.reservation_id
+       WHERE res.reservation_id = ?`,
+      [req.params.id]
+    );
+    if (!reservation) return res.status(404).json({ error: 'Reservation not found' });
+    res.json(reservation);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update reservation
+router.put('/reservation/:id', async (req, res) => {
+  const { room_id, check_in_date, check_out_date, status } = req.body;
+  try {
+    await db.query(
+      `UPDATE reservation SET room_id = ?, check_in_date = ?, check_out_date = ?, status = ? WHERE reservation_id = ?`,
+      [room_id, check_in_date, check_out_date, status, req.params.id]
+    );
+    
+    // Recalculate bill
+    const [[room]] = await db.query(`SELECT price FROM room WHERE room_id = ?`, [room_id]);
+    const nights = Math.ceil((new Date(check_out_date) - new Date(check_in_date)) / (1000 * 60 * 60 * 24));
+    const total_bill = (room.price * (nights || 1)).toFixed(2);
+    
+    await db.query(
+      `UPDATE receipt SET total_bill = ?, clock_in = ?, clock_out = ?, room_id = ? WHERE reservation_id = ?`,
+      [total_bill, check_in_date, check_out_date, room_id, req.params.id]
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Confirm payment for reservation
+router.put('/reservation/:id/payment', async (req, res) => {
+  const { is_paid } = req.body;
+  try {
+    await db.query(
+      `UPDATE receipt SET is_paid = ? WHERE reservation_id = ?`,
+      [is_paid ? 1 : 0, req.params.id]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Check in customer
 router.post('/checkin/:reservation_id', async (req, res) => {
   const { promotional_id } = req.body;
