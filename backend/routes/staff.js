@@ -271,7 +271,7 @@ router.post('/staff', async (req, res) => {
   const { hotel_id, first_name, last_name, contact_number, role, conditions, salary } = req.body;
   try {
     const [result] = await db.query(
-      `INSERT INTO staff (hotel_id, first_name, last_name, contact_number, role, conditions, salary, penalty_points)
+      `INSERT INTO staff (hotel_id, first_name, last_name, contact_number, role, conditions, salary, penalty_point)
        VALUES (?, ?, ?, ?, ?, ?, ?, 0)`,
       [hotel_id, first_name, last_name, contact_number || null, role, conditions || 'active', salary]
     );
@@ -313,7 +313,7 @@ router.put('/staff/:id/penalty', async (req, res) => {
   const { points } = req.body;
   try {
     await db.query(
-      `UPDATE staff SET penalty_points = penalty_points + ? WHERE staff_id = ?`,
+      `UPDATE staff SET penalty_point = COALESCE(penalty_point, 0) + ? WHERE staff_id = ?`,
       [points, req.params.id]
     );
     res.json({ success: true });

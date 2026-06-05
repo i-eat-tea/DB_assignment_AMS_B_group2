@@ -756,6 +756,7 @@
           <td>${s.penalty_point || 0}</td>
           <td>
             <button class="action-btn" onclick="window.location.href='staff-form.html?staff_id=${s.staff_id}'" title="Edit"><i class="fas fa-edit"></i></button>
+            <button class="action-btn danger" onclick="addPenalty(${s.staff_id})" title="Add Penalty"><i class="fas fa-exclamation-triangle"></i></button>
           </td>
         </tr>`).join('');
     } catch (e) {
@@ -765,7 +766,12 @@
 
   async function addPenalty(id) {
     const p = prompt('Penalty points to add:');
-    if (p) { await apiFetch(`/staff/${id}/penalty`, { method: 'PUT', body: JSON.stringify({ points: parseInt(p) }) }); loadStaff(); }
+    if (p) {
+      const points = parseInt(p);
+      if (isNaN(points)) return alert('Invalid number');
+      await apiFetch(`/staff/${id}/penalty`, { method: 'PUT', body: JSON.stringify({ points }) });
+      loadStaff();
+    }
   }
 
   async function loadPromotions() {
