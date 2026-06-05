@@ -447,6 +447,18 @@
             </div>
           </div>
         </div>
+
+        <div class="section-header mt-4"><span class="section-title">Quick Reference: Active & Pending Reservations</span></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Guest</th><th>Room</th><th>Dates</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody id="quickResBody">
+              <tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted)">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div class="tab-pane" id="tab-reviews">
@@ -504,7 +516,7 @@
     if (name === 'reservations') loadReservations();
     else if (name === 'rooms') loadRooms();
     else if (name === 'customers') loadCustomers();
-    else if (name === 'checkinout') loadPromotions(); 
+    else if (name === 'checkinout') { loadPromotions(); loadQuickReservations(); } 
     else if (name === 'reviews') loadActiveStays();
     else if (name === 'mystats') loadMyStats();
   }
@@ -514,6 +526,35 @@
     const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || `HTTP ${res.status}`); }
     return res.json();
+  }
+
+  async function loadQuickReservations() {
+    try {
+      const data = await apiFetch('/reservations');
+      const tbody = document.getElementById('quickResBody');
+      const active = data.filter(r => r.status === 'pending' || r.status === 'confirmed');
+      if (!active.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px">No active/pending stays</td></tr>'; return; }
+      tbody.innerHTML = active.map(r => `
+        <tr>
+          <td class="cell-muted">#${r.reservation_id}</td>
+          <td>${r.customer_name || 'Guest'}</td>
+          <td>Room ${r.room_number}</td>
+          <td class="cell-muted">${r.check_in_date} to ${r.check_out_date}</td>
+          <td><span class="badge badge-${r.status}">${r.status}</span></td>
+          <td><button class="btn btn-sm" onclick="selectRes(${r.reservation_id})">Select</button></td>
+        </tr>`).join('');
+    } catch (e) { console.error(e); }
+  }
+
+  function selectRes(id) {
+    document.getElementById('checkReservationId').value = id;
+    document.getElementById('checkoutResult').innerHTML = `<span style="color:var(--primary)">Selected Reservation #${id}</span>`;
+  }
+
+  function goToReservationForm() {
+    const rid = document.getElementById('checkReservationId').value;
+    if (!rid) return alert('Please enter or select a Reservation ID first');
+    window.location.href = `reservation-form.html?res_id=${rid}`;
   }
 
   async function loadPromotions() {
