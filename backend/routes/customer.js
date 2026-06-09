@@ -9,7 +9,19 @@ router.get('/rooms', async (req, res) => {
   let query = `
     SELECT r.room_id, r.number, r.type, r.price, r.capacity,
            a.has_wifi, a.bedroom_amount, a.bathroom_amount,
-           MIN(ri.link) AS picture_url
+           MIN(ri.link) AS picture_url,
+           CASE 
+             WHEN r.conditions = 'repairing' THEN 'repairing'
+             WHEN r.conditions = 'occupied' THEN 'occupied'
+             WHEN EXISTS (
+               SELECT 1 FROM reservation res 
+               WHERE res.room_id = r.room_id 
+               AND res.status = 'confirmed' 
+               AND CURDATE() >= res.check_in_date 
+               AND CURDATE() < res.check_out_date
+             ) THEN 'occupied'
+             ELSE 'free'
+           END AS conditions
     FROM room r
     LEFT JOIN amenities a ON r.room_id = a.room_id
     LEFT JOIN room_img ri ON r.room_id = ri.room_id
@@ -24,7 +36,7 @@ router.get('/rooms', async (req, res) => {
     params.push(check_out, check_in);
   }
   query += ` GROUP BY r.room_id, r.number, r.type, r.price, r.capacity,
-             a.has_wifi, a.bedroom_amount, a.bathroom_amount`;
+             a.has_wifi, a.bedroom_amount, a.bathroom_amount, r.conditions`;
   try {
     const [rows] = await db.query(query, params);
     res.json(rows);
@@ -39,7 +51,19 @@ router.get('/rooms/:id', async (req, res) => {
   try {
     const [[room]] = await db.query(
       `SELECT r.room_id, r.number, r.type, r.price, r.capacity,
-              r.conditions, a.has_wifi, a.bedroom_amount, a.bathroom_amount
+              CASE 
+                WHEN r.conditions = 'repairing' THEN 'repairing'
+                WHEN r.conditions = 'occupied' THEN 'occupied'
+                WHEN EXISTS (
+                  SELECT 1 FROM reservation res 
+                  WHERE res.room_id = r.room_id 
+                  AND res.status = 'confirmed' 
+                  AND CURDATE() >= res.check_in_date 
+                  AND CURDATE() < res.check_out_date
+                ) THEN 'occupied'
+                ELSE 'free'
+              END AS conditions,
+              a.has_wifi, a.bedroom_amount, a.bathroom_amount
        FROM room r
        LEFT JOIN amenities a ON r.room_id = a.room_id
        WHERE r.room_id = ?`,

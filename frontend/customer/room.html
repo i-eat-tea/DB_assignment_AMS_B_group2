@@ -255,6 +255,9 @@
                     <small class="position-absolute start-0 bottom-0 bg-primary text-white rounded py-1 px-3 ms-4 mb-2" style="z-index:10;">
                         $${r.price}/Night
                     </small>
+                    <small class="position-absolute end-0 top-0 ${r.conditions === 'free' ? 'bg-success' : (r.conditions === 'occupied' ? 'bg-danger' : 'bg-warning')} text-white rounded py-1 px-3 me-4 mt-2 text-uppercase" style="z-index:10;">
+                        ${r.conditions}
+                    </small>
                 </div>
 
                 <div class="p-4 mt-2">

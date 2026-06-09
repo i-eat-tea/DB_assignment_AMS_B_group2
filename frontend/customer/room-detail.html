@@ -207,7 +207,7 @@ async function fetchRoomPageData() {
                 </div>
 
                 <div class="mb-4">
-                    <span class="badge ${r.conditions === 'available' ? 'bg-success' : 'bg-danger'} py-2 px-3">
+                    <span class="badge ${r.conditions === 'free' ? 'bg-success' : (r.conditions === 'occupied' ? 'bg-danger' : 'bg-warning')} py-2 px-3 text-uppercase">
                         ${r.conditions ?? 'Unknown'}
                     </span>
                 </div>

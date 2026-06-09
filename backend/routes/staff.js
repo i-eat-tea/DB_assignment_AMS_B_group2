@@ -209,7 +209,20 @@ router.put('/checkout/:reservation_id', async (req, res) => {
 router.get('/rooms', async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT r.*, a.has_wifi, a.bedroom_amount, a.bathroom_amount
+      `SELECT r.room_id, r.hotel_id, r.number, r.type, r.price, r.capacity, r.picture_url,
+              CASE 
+                WHEN r.conditions = 'repairing' THEN 'repairing'
+                WHEN r.conditions = 'occupied' THEN 'occupied'
+                WHEN EXISTS (
+                  SELECT 1 FROM reservation res 
+                  WHERE res.room_id = r.room_id 
+                  AND res.status = 'confirmed' 
+                  AND CURDATE() >= res.check_in_date 
+                  AND CURDATE() < res.check_out_date
+                ) THEN 'occupied'
+                ELSE 'free'
+              END AS conditions,
+              a.has_wifi, a.bedroom_amount, a.bathroom_amount
        FROM room r
        LEFT JOIN amenities a ON r.room_id = a.room_id
        WHERE r.hotel_id = ?`,
@@ -227,7 +240,19 @@ router.get('/room/:id', async (req, res) => {
   try {
     const [[room]] = await db.query(
       `SELECT r.room_id, r.hotel_id, r.number, r.type, r.price, r.capacity,
-              r.picture_url, r.conditions,
+              r.picture_url,
+              CASE 
+                WHEN r.conditions = 'repairing' THEN 'repairing'
+                WHEN r.conditions = 'occupied' THEN 'occupied'
+                WHEN EXISTS (
+                  SELECT 1 FROM reservation res 
+                  WHERE res.room_id = r.room_id 
+                  AND res.status = 'confirmed' 
+                  AND CURDATE() >= res.check_in_date 
+                  AND CURDATE() < res.check_out_date
+                ) THEN 'occupied'
+                ELSE 'free'
+              END AS conditions,
               a.has_wifi, a.bedroom_amount, a.bathroom_amount
        FROM room r
        LEFT JOIN amenities a ON r.room_id = a.room_id
@@ -392,7 +417,22 @@ router.put('/staff/:id/penalty', async (req, res) => {
 router.get('/reports/occupancy', async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT r.type, r.conditions, COUNT(*) AS count FROM room r GROUP BY r.type, r.conditions`
+      `SELECT r.type, 
+              CASE 
+                WHEN r.conditions = 'repairing' THEN 'repairing'
+                WHEN r.conditions = 'occupied' THEN 'occupied'
+                WHEN EXISTS (
+                  SELECT 1 FROM reservation res 
+                  WHERE res.room_id = r.room_id 
+                  AND res.status = 'confirmed' 
+                  AND CURDATE() >= res.check_in_date 
+                  AND CURDATE() < res.check_out_date
+                ) THEN 'occupied'
+                ELSE 'free'
+              END AS conditions,
+              COUNT(*) AS count 
+       FROM room r 
+       GROUP BY r.type, conditions`
     );
     res.json(rows);
   } catch (err) {
@@ -520,21 +560,7 @@ router.delete('/promotional/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// Get all rooms (for staff)
-router.get('/rooms', async (req, res) => {
-  try {
-    const [rows] = await db.query(
-      `SELECT r.*, a.has_wifi, a.bedroom_amount, a.bathroom_amount
-       FROM room r
-       LEFT JOIN amenities a ON r.room_id = a.room_id
-       WHERE r.hotel_id = ?`,
-      [req.staff?.hotel_id || 1] // adjust if you have staff.hotel_id from token
-    );
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+// Get all rooms (for staff) - REMOVED DUPLICATE
 router.get('/customers', async (req, res) => {
   try {
     const [rows] = await db.query(
