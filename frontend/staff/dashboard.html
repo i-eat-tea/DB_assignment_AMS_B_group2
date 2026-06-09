@@ -701,6 +701,13 @@
     return res.json();
   }
 
+  function formatDate(dateStr) {
+    if (!dateStr) return 'N/A';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
   async function loadQuickReservations() {
     try {
       const data = await apiFetch('/reservations');
@@ -712,7 +719,7 @@
           <td class="cell-muted">#${r.reservation_id}</td>
           <td>${r.customer_name || 'Guest'}</td>
           <td>Room ${r.room_number}</td>
-          <td class="cell-muted">${r.check_in_date} to ${r.check_out_date}</td>
+          <td class="cell-muted">${formatDate(r.check_in_date)} to ${formatDate(r.check_out_date)}</td>
           <td><span class="badge badge-${r.status}">${r.status}</span></td>
           <td><button class="btn btn-sm" onclick="selectRes(${r.reservation_id})">Select</button></td>
         </tr>`).join('');
@@ -745,8 +752,8 @@
           <td class="cell-muted">#${r.reservation_id}</td>
           <td>${r.customer_name || r.name || 'N/A'}</td>
           <td>${r.room_number || r.number} <span style="color:var(--text-muted)">(${r.type})</span></td>
-          <td class="cell-muted">${r.check_in_date}</td>
-          <td class="cell-muted">${r.check_out_date}</td>
+          <td class="cell-muted">${formatDate(r.check_in_date)}</td>
+          <td class="cell-muted">${formatDate(r.check_out_date)}</td>
           <td><span class="badge badge-${r.status}">${r.status}</span></td>
           <td>
             <button class="action-btn" onclick="window.location.href='reservation-form.html?res_id=${r.reservation_id}'" title="Edit"><i class="fas fa-edit"></i></button>
@@ -772,10 +779,10 @@
           <td>${r.type}</td>
           <td>$${r.price}</td>
           <td>${r.capacity}</td>
-          <td><span class="badge badge-neutral">${r.conditions}</span></td>
+          <td><span class="badge ${r.current_condition === 'free' ? 'badge-confirmed' : (r.current_condition === 'occupied' ? 'badge-cancelled' : 'badge-pending')} text-uppercase">${r.current_condition}</span></td>
           <td>
             <button class="action-btn" onclick="window.location.href='room-form.html?room_id=${r.room_id}'" title="Edit"><i class="fas fa-edit"></i></button>
-            <button class="action-btn warning" onclick="window.location.href='room-form.html?room_id=${r.room_id}'" title="Change condition"><i class="fas fa-wrench"></i></button>
+            <button class="action-btn warning" onclick="updateRoomCondition(${r.room_id})" title="Change condition"><i class="fas fa-wrench"></i></button>
           </td>
         </tr>`).join('');
     } catch (e) {
@@ -828,8 +835,8 @@
           <td class="cell-muted">#${p.promotional_id}</td>
           <td>${p.statement || ''}</td>
           <td><span class="badge badge-confirmed">${p.discounts}%</span></td>
-          <td class="cell-muted">${p.start_date}</td>
-          <td class="cell-muted">${p.end_date}</td>
+          <td class="cell-muted">${formatDate(p.start_date)}</td>
+          <td class="cell-muted">${formatDate(p.end_date)}</td>
           <td><button class="action-btn" onclick="window.location.href='promotional-form.html?promo_id=${p.promotional_id}'"><i class="fas fa-edit"></i></button></td>
         </tr>`).join('');
     } catch (e) {
@@ -842,7 +849,7 @@
       const data = await apiFetch('/reports/occupancy');
       document.getElementById('occupancyBody').innerHTML = !data.length
         ? '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:20px">No data</td></tr>'
-        : data.map(r => `<tr><td>${r.type}</td><td><span class="badge badge-neutral">${r.conditions}</span></td><td>${r.count}</td></tr>`).join('');
+        : data.map(r => `<tr><td>${r.type}</td><td><span class="badge ${r.current_condition === 'free' ? 'badge-confirmed' : (r.current_condition === 'occupied' ? 'badge-cancelled' : 'badge-pending')} text-uppercase">${r.current_condition}</span></td><td>${r.count}</td></tr>`).join('');
     } catch (e) {
       document.getElementById('occupancyBody').innerHTML = `<tr><td colspan="3" style="color:#9B2335;padding:20px">Error: ${e.message}</td></tr>`;
     }

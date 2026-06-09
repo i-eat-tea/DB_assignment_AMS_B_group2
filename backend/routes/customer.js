@@ -21,7 +21,7 @@ router.get('/rooms', async (req, res) => {
                AND CURDATE() < res.check_out_date
              ) THEN 'occupied'
              ELSE 'free'
-           END AS conditions
+           END AS current_condition
     FROM room r
     LEFT JOIN amenities a ON r.room_id = a.room_id
     LEFT JOIN room_img ri ON r.room_id = ri.room_id
@@ -62,7 +62,7 @@ router.get('/rooms/:id', async (req, res) => {
                   AND CURDATE() < res.check_out_date
                 ) THEN 'occupied'
                 ELSE 'free'
-              END AS conditions,
+              END AS current_condition,
               a.has_wifi, a.bedroom_amount, a.bathroom_amount
        FROM room r
        LEFT JOIN amenities a ON r.room_id = a.room_id

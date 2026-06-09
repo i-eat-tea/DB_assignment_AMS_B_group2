@@ -210,6 +210,7 @@ router.get('/rooms', async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT r.room_id, r.hotel_id, r.number, r.type, r.price, r.capacity, r.picture_url,
+              r.conditions AS raw_condition,
               CASE 
                 WHEN r.conditions = 'repairing' THEN 'repairing'
                 WHEN r.conditions = 'occupied' THEN 'occupied'
@@ -221,7 +222,7 @@ router.get('/rooms', async (req, res) => {
                   AND CURDATE() < res.check_out_date
                 ) THEN 'occupied'
                 ELSE 'free'
-              END AS conditions,
+              END AS current_condition,
               a.has_wifi, a.bedroom_amount, a.bathroom_amount
        FROM room r
        LEFT JOIN amenities a ON r.room_id = a.room_id
@@ -240,7 +241,7 @@ router.get('/room/:id', async (req, res) => {
   try {
     const [[room]] = await db.query(
       `SELECT r.room_id, r.hotel_id, r.number, r.type, r.price, r.capacity,
-              r.picture_url,
+              r.picture_url, r.conditions AS raw_condition,
               CASE 
                 WHEN r.conditions = 'repairing' THEN 'repairing'
                 WHEN r.conditions = 'occupied' THEN 'occupied'
@@ -252,7 +253,7 @@ router.get('/room/:id', async (req, res) => {
                   AND CURDATE() < res.check_out_date
                 ) THEN 'occupied'
                 ELSE 'free'
-              END AS conditions,
+              END AS current_condition,
               a.has_wifi, a.bedroom_amount, a.bathroom_amount
        FROM room r
        LEFT JOIN amenities a ON r.room_id = a.room_id
@@ -429,10 +430,10 @@ router.get('/reports/occupancy', async (req, res) => {
                   AND CURDATE() < res.check_out_date
                 ) THEN 'occupied'
                 ELSE 'free'
-              END AS conditions,
+              END AS current_condition,
               COUNT(*) AS count 
        FROM room r 
-       GROUP BY r.type, conditions`
+       GROUP BY r.type, current_condition`
     );
     res.json(rows);
   } catch (err) {

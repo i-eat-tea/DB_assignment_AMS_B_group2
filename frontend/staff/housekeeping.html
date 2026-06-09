@@ -161,7 +161,7 @@
           <td class="cell-muted">#${r.room_id}</td>
           <td class="fw-bold">${r.number}</td>
           <td>${r.type}</td>
-          <td><span class="badge badge-${r.conditions}">${r.conditions}</span></td>
+          <td><span class="badge ${r.current_condition === 'free' ? 'badge-free' : (r.current_condition === 'occupied' ? 'badge-occupied' : 'badge-repairing')} text-uppercase">${r.current_condition}</span></td>
           <td>
             <button class="action-btn text-success" onclick="updateCondition(${r.room_id}, 'free')" title="Set Clean / Free"><i class="fas fa-check-circle"></i> Clean</button>
             <button class="action-btn text-warning" onclick="updateCondition(${r.room_id}, 'repairing')" title="Set Repairing"><i class="fas fa-tools"></i> Maintenance</button>
