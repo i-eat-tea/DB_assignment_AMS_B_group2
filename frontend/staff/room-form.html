@@ -476,8 +476,8 @@
         conditions, has_wifi,
         bedroom_amount: parseInt(bedroom_amount),
         bathroom_amount: parseInt(bathroom_amount),
-        // send all pending image URLs
-        image_urls: pendingImages
+        // send all image URLs (existing + pending)
+        image_urls: [...existingImages, ...pendingImages]
       };
 
       try {

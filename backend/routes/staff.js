@@ -295,9 +295,12 @@ router.put('/room/:id', async (req, res) => {
       );
     }
 
-    if (image_urls && image_urls.length) {
-      for (const url of image_urls) {
-        await db.query(`INSERT INTO room_img (room_id, link) VALUES (?, ?)`, [id, url]);
+    if (image_urls) {
+      await db.query(`DELETE FROM room_img WHERE room_id = ?`, [id]);
+      if (image_urls.length) {
+        for (const url of image_urls) {
+          await db.query(`INSERT INTO room_img (room_id, link) VALUES (?, ?)`, [id, url]);
+        }
       }
     }
 
@@ -330,12 +333,12 @@ router.get('/staff', async (req, res) => {
 });
 
 router.post('/staff', async (req, res) => {
-  const { hotel_id, first_name, last_name, contact_number, role, conditions, salary } = req.body;
+  const { hotel_id, first_name, last_name, contact_number, role, conditions, salary, password } = req.body;
   try {
     const [result] = await db.query(
-      `INSERT INTO staff (hotel_id, first_name, last_name, contact_number, role, conditions, salary, penalty_point)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 0)`,
-      [hotel_id, first_name, last_name, contact_number || null, role, conditions || 'active', salary]
+      `INSERT INTO staff (hotel_id, first_name, last_name, contact_number, role, conditions, salary, password, penalty_point)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)`,
+      [hotel_id, first_name, last_name, contact_number || '', role, conditions || 'active', salary, password]
     );
     res.json({ success: true, staff_id: result.insertId });
   } catch (err) {
